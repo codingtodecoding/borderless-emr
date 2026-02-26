@@ -86,7 +86,7 @@
                 @endif
 
                 <!-- Location Management (Admin Only) -->
-                @if(Auth::user()->hasAnyPermission(['countries_view', 'states_view', 'districts_view', 'talukas_view']))
+                @if(Auth::user()->hasAnyPermission(['countries_view', 'states_view', 'districts_view', 'talukas_view', 'villages_view']))
                     <li class="sidebar-menu-header">Location Management</li>
                     <li class="sidebar-submenu-container">
                         <a href="#locationSubmenu" class="sidebar-submenu-toggle" data-bs-toggle="collapse" role="button" aria-expanded="false">
@@ -127,6 +127,15 @@
                                     <a href="{{ route('admin.talukas.index') }}" class="{{ request()->routeIs('admin.talukas.*') ? 'active' : '' }}">
                                         <i class="bi bi-geo-alt"></i>
                                         <span>Talukas</span>
+                                    </a>
+                                </li>
+                            @endif
+
+                            @if(Auth::user()->hasPermission('villages_view'))
+                                <li>
+                                    <a href="{{ route('admin.villages.index') }}" class="{{ request()->routeIs('admin.villages.*') ? 'active' : '' }}">
+                                        <i class="bi bi-houses"></i>
+                                        <span>Villages</span>
                                     </a>
                                 </li>
                             @endif
@@ -192,6 +201,61 @@
                                 </a>
                             </li>
                         </ul>
+                    </li>
+                @endif
+
+                <!-- Complaints Management -->
+                @if(Auth::user()->hasPermission('complaints_view'))
+                    <li class="sidebar-menu-header">Complaints</li>
+                    <li>
+                        <a href="{{ route('admin.complaints.index') }}" class="{{ request()->routeIs('admin.complaints.*') ? 'active' : '' }}">
+                            <i class="bi bi-exclamation-triangle"></i><span> Complaints</span>
+                        </a>
+                    </li>
+                @endif
+
+                <!-- Diagnosis Management -->
+                @if(Auth::user()->hasPermission('diagnoses_view'))
+                    <li class="sidebar-menu-header">Diagnosis</li>
+                    <li>
+                        <a href="{{ route('admin.diagnoses.index') }}"
+                        class="{{ request()->routeIs('admin.diagnoses.*') ? 'active' : '' }}">
+                            <i class="bi bi-clipboard2-pulse"></i>
+                            <span> Diagnosis</span>
+                        </a>
+                    </li>
+                @endif
+
+                <!-- Treatment Management -->
+                @if(Auth::user()->hasPermission('treatments_view'))
+                    <li class="sidebar-menu-header">Treatment</li>
+                    <li>
+                        <a href="{{ route('admin.treatments.index') }}" class="{{ request()->routeIs('admin.treatments.*') ? 'active' : '' }}">
+                            <i class="bi bi-prescription2"></i>
+                            <span>Treatment</span>
+                        </a>
+                    </li>
+                @endif
+
+                <!-- Known Conditions Management -->
+                @if(Auth::user()->hasPermission('known_conditions_view'))
+                    <li class="sidebar-menu-header">Known Conditions</li>
+                    <li>
+                        <a href="{{ route('admin.known-conditions.index') }}" class="{{ request()->routeIs('admin.known-conditions.*') ? 'active' : '' }}">
+                            <i class="bi bi-virus2"></i>
+                            <span>Known Conditions</span>
+                        </a>
+                    </li>
+                @endif
+
+                <!-- Lab Tests Management -->
+                @if(Auth::user()->hasPermission('lab_tests_view'))
+                    <li class="sidebar-menu-header">Lab Tests</li>
+                    <li>
+                        <a href="{{ route('admin.lab-tests.index') }}" class="{{ request()->routeIs('admin.lab-tests.*') ? 'active' : '' }}">
+                            <i class="bi bi-flask"></i>
+                            <span>Lab Tests</span>
+                        </a>
                     </li>
                 @endif
             </ul>

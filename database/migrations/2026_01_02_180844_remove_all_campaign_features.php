@@ -15,12 +15,11 @@ return new class extends Migration
         Schema::disableForeignKeyConstraints();
 
         // Remove campaign_type_id from patients table first
-        Schema::table('patients', function (Blueprint $table) {
-            if (Schema::hasColumn('patients', 'campaign_type_id')) {
-                $table->dropForeign(['campaign_type_id']);
+        if (Schema::hasColumn('patients', 'campaign_type_id')) {
+            Schema::table('patients', function (Blueprint $table) {
                 $table->dropColumn('campaign_type_id');
-            }
-        });
+            });
+        }
 
         // Drop campaign-related tables
         Schema::dropIfExists('patient_campaign_values');

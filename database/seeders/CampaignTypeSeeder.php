@@ -14,33 +14,23 @@ class CampaignTypeSeeder extends Seeder
     {
         $campaignTypes = [
             [
-                'name' => 'Health Screening',
-                'description' => 'Regular health screening and checkup campaign',
+                'name' => 'General Health Screening',
+                'description' => 'Regular health screening and checkup campaign with complete patient data collection',
                 'is_active' => true,
             ],
             [
-                'name' => 'Vaccination Drive',
-                'description' => 'Immunization and vaccination campaign',
+                'name' => 'Swatch Bharat',
+                'description' => 'Swachh Bharat health initiative - Basic patient information and location data only',
                 'is_active' => true,
             ],
             [
-                'name' => 'Disease Awareness',
-                'description' => 'Disease awareness and prevention campaign',
+                'name' => 'Special HC. Beneficiary',
+                'description' => 'Special Health Centre Beneficiary scheme - Selective health data collection',
                 'is_active' => true,
             ],
             [
-                'name' => 'Maternal Health',
-                'description' => 'Maternal and child health campaign',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Chronic Disease Management',
-                'description' => 'Management of chronic diseases campaign',
-                'is_active' => true,
-            ],
-            [
-                'name' => 'Mental Health',
-                'description' => 'Mental health awareness and support campaign',
+                'name' => 'Awareness Camp',
+                'description' => 'Health awareness and educational campaign - Focused on awareness and basic metrics',
                 'is_active' => true,
             ],
         ];

@@ -21,10 +21,14 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             LocationSeeder::class,
             TalukaDistrictSeeder::class,
+            VillageSeeder::class,
             CampaignTypeSeeder::class,
+            LabTestSeeder::class,
             DataEntryUserSeeder::class,
             UserSeeder::class,
-            CampaignSeeder::class,
+            ComplaintSeeder::class,
+            DiagnosisSeeder::class,
+            KnownConditionSeeder::class,
         ]);
     }
 }

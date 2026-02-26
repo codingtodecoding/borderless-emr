@@ -20,6 +20,10 @@ class Taluka extends Model
     {
         return $this->belongsTo(District::class);
     }
+    public function villages()
+    {
+        return $this->hasMany(Village::class);
+    }
 
     public function scopeActive($query)
     {

@@ -1,0 +1,326 @@
+<!-- General Health Screening Campaign - Full Form -->
+@php
+    $patient = $patient ?? null;
+@endphp
+
+<!-- Basic Information Section -->
+<h5 class="mb-2" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-person-vcard"></i> Basic Information
+</h5>
+
+<div class="row">
+    <div class="col-md-4 mb-2">
+        <label for="patient_name" class="form-label">Patient Name <span style="color: red;">*</span></label>
+        <input type="text" class="form-control @error('patient_name') is-invalid @enderror" id="patient_name" name="patient_name" value="{{ old('patient_name', $patient ? $patient->patient_name : '') }}" required>
+        @error('patient_name')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-3 mb-2">
+        <label for="age" class="form-label">Age <span style="color: red;">*</span></label>
+        <input type="number" class="form-control @error('age') is-invalid @enderror" id="age" name="age" value="{{ old('age', $patient ? $patient->age : '') }}" min="0" max="150" required>
+        @error('age')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-3 mb-2">
+        <label for="sex" class="form-label">Sex <span style="color: red;">*</span></label>
+        <select class="form-select @error('sex') is-invalid @enderror" id="sex" name="sex" required>
+            <option value="">-- Select --</option>
+            <option value="Male" {{ old('sex', $patient ? $patient->sex : '') == 'Male' ? 'selected' : '' }}>Male</option>
+            <option value="Female" {{ old('sex', $patient ? $patient->sex : '') == 'Female' ? 'selected' : '' }}>Female</option>
+            <option value="Other" {{ old('sex', $patient ? $patient->sex : '') == 'Other' ? 'selected' : '' }}>Other</option>
+        </select>
+        @error('sex')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="date" class="form-label">Date <span style="color: red;">*</span></label>
+        <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $patient ? $patient->date : date('Y-m-d')) }}" required>
+        @error('date')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<!-- Location Details Section -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-geo-alt"></i> Location Details
+</h5>
+
+<div class="row">
+    <div class="col-md-3 mb-2">
+        <label for="country_id" class="form-label">Country <span style="color: red;">*</span></label>
+        <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id" onchange="loadStates()" required>
+            <option value="">-- Select Country --</option>
+            @foreach ($countries as $country)
+                <option value="{{ $country->id }}" {{ old('country_id', $patient ? $patient->country_id : '') == $country->id ? 'selected' : '' }}>
+                    {{ $country->name }}
+                </option>
+            @endforeach
+        </select>
+        @error('country_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-3 mb-2">
+        <label for="state_id" class="form-label">State <span style="color: red;">*</span></label>
+        <select class="form-select @error('state_id') is-invalid @enderror" id="state_id" name="state_id" onchange="loadDistricts()" required>
+            <option value="">-- Select State --</option>
+        </select>
+        @error('state_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-3 mb-2">
+        <label for="district_id" class="form-label">District <span style="color: red;">*</span></label>
+        <select class="form-select @error('district_id') is-invalid @enderror" id="district_id" name="district_id" onchange="loadTalukas()" required>
+            <option value="">-- Select District --</option>
+        </select>
+        @error('district_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-3 mb-2">
+        <label for="taluka_id" class="form-label">Taluka <span style="color: red;">*</span></label>
+        <select class="form-select @error('taluka_id') is-invalid @enderror" id="taluka_id" name="taluka_id" onchange="loadVillages()" required>
+            <option value="">-- Select Taluka --</option>
+        </select>
+        @error('taluka_id')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-2">
+        <label for="village" class="form-label">Village <span style="color: red;">*</span></label>
+        <input type="text" class="form-control @error('village') is-invalid @enderror" id="village" name="village" value="{{ old('village', $patient ? $patient->village : '') }}" placeholder="Search village..." autocomplete="off" required>
+        <div id="village-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2px;"></div>
+        @error('village')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-4 mb-2">
+        <label for="mobile" class="form-label">Mobile <span style="color: red;">*</span></label>
+        <input type="tel" class="form-control @error('mobile') is-invalid @enderror" id="mobile" name="mobile" value="{{ old('mobile', $patient ? $patient->mobile : '') }}" placeholder="10 digit mobile number" maxlength="10" required>
+        @error('mobile')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-4 mb-2">
+        <label for="aadhar" class="form-label">Aadhar</label>
+        <input type="text" class="form-control @error('aadhar') is-invalid @enderror" id="aadhar" name="aadhar" value="{{ old('aadhar', $patient ? $patient->aadhar : '') }}" placeholder="12 digit aadhar number" maxlength="12">
+        @error('aadhar')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<!-- Vital Signs Section -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-heart-pulse"></i> Vital Signs
+</h5>
+
+<div class="row">
+    <div class="col-md-2 mb-2">
+        <label for="height" class="form-label">Height (cm)</label>
+        <input type="number" step="0.01" class="form-control @error('height') is-invalid @enderror" id="height" name="height" value="{{ old('height', $patient ? $patient->height : '') }}" placeholder="in cm">
+        @error('height')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="weight" class="form-label">Weight (kg)</label>
+        <input type="number" step="0.01" class="form-control @error('weight') is-invalid @enderror" id="weight" name="weight" value="{{ old('weight', $patient ? $patient->weight : '') }}" placeholder="in kg">
+        @error('weight')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="bmi_display" class="form-label">BMI</label>
+        <input type="text" class="form-control" id="bmi_display" readonly value="{{ old('bmi', $patient ? $patient->bmi : '') }}">
+        <input type="hidden" id="bmi" name="bmi" value="{{ old('bmi', $patient ? $patient->bmi : '') }}">
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="bp" class="form-label">BP (mmHg)</label>
+        <input type="text" class="form-control @error('bp') is-invalid @enderror" id="bp" name="bp" value="{{ old('bp', $patient ? $patient->bp : '') }}" placeholder="e.g., 120/80">
+        @error('bp')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="rbs" class="form-label">RBS (mg/dL)</label>
+        <input type="number" class="form-control @error('rbs') is-invalid @enderror" id="rbs" name="rbs" value="{{ old('rbs', $patient ? $patient->rbs : '') }}">
+        @error('rbs')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="bsl" class="form-label">BSL (mg/dL)</label>
+        <input type="number" class="form-control @error('bsl') is-invalid @enderror" id="bsl" name="bsl" value="{{ old('bsl', $patient ? $patient->bsl : '') }}">
+        @error('bsl')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2 mb-2">
+        <label for="hb" class="form-label">HB (g/dL)</label>
+        <input type="number" step="0.1" class="form-control @error('hb') is-invalid @enderror" id="hb" name="hb" value="{{ old('hb', $patient ? $patient->hb : '') }}">
+        @error('hb')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+</div>
+
+<!-- Clinical Information Section -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-clipboard-pulse"></i> Clinical Information
+</h5>
+
+<div class="mb-2">
+    <label for="complaints_select" class="form-label">Chief Complaints</label>
+    <select class="form-select @error('complaints') is-invalid @enderror" id="complaints_select" name="complaints_select">
+        <option value="">-- Select Complaints --</option>
+        @foreach ($complaints as $complaint)
+            <option value="{{ $complaint->complaint }}">{{ $complaint->complaint }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" id="complaints_hidden" name="complaints" value="{{ old('complaints', $patient ? $patient->complaints : '') }}">
+    @error('complaints')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="mb-2">
+    <label for="known_conditions_select" class="form-label">Known Conditions</label>
+    <select class="form-select @error('known_conditions') is-invalid @enderror" id="known_conditions_select" name="known_conditions_select">
+        <option value="">-- Select Known Conditions --</option>
+        @foreach ($knownConditions as $condition)
+            <option value="{{ $condition->title }}">{{ $condition->title }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" id="known_conditions_hidden" name="known_conditions" value="{{ old('known_conditions', $patient ? $patient->known_conditions : '') }}">
+    @error('known_conditions')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="mb-2">
+    <label for="diagnosis_select" class="form-label">Diagnosis</label>
+    <select class="form-select @error('diagnosis') is-invalid @enderror" id="diagnosis_select" name="diagnosis_select">
+        <option value="">-- Select Diagnosis --</option>
+        @foreach ($diagnoses as $diagnosis)
+            <option value="{{ $diagnosis->title }}">{{ $diagnosis->title }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" id="diagnosis_hidden" name="diagnosis" value="{{ old('diagnosis', $patient ? $patient->diagnosis : '') }}">
+    @error('diagnosis')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<!-- Treatment Section -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-prescription2"></i> Treatment
+</h5>
+
+<div class="mb-2">
+    <label for="treatment_select" class="form-label">Treatment</label>
+    <select class="form-select @error('treatment') is-invalid @enderror" id="treatment_select" name="treatment_select" multiple>
+        @foreach ($treatments as $treatment)
+            <option value="{{ $treatment->name }}">{{ $treatment->name }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" id="treatment_hidden" name="treatment" value="{{ old('treatment', $patient ? $patient->treatment : '') }}">
+    @error('treatment')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<div class="mb-2">
+    <label for="dosage" class="form-label">Dosage</label>
+    <textarea class="form-control @error('dosage') is-invalid @enderror" id="dosage" name="dosage" rows="2">{{ old('dosage', $patient ? $patient->dosage : '') }}</textarea>
+    @error('dosage')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+<!-- Lab Tests & Referral -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-flask"></i> Lab Tests & Referral
+</h5>
+
+<div class="mb-3">
+    <label class="form-label">Lab Tests</label>
+    <div class="lab-tests-container">
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="lab_test_input" placeholder="Search and add lab tests..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="add_lab_test_btn">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
+        </div>
+        <div id="selected_lab_tests" class="selected-tests-list">
+            @php
+                $labTests = old('lab_tests', $patient->lab_tests ?? []);
+            @endphp
+            @if($labTests && is_array($labTests))
+                @foreach($labTests as $test)
+                    <span class="badge bg-primary me-2 mb-2">
+                        {{ $test }}
+                        <input type="hidden" name="lab_tests[]" value="{{ $test }}">
+                        <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove()"></button>
+                    </span>
+                @endforeach
+            @endif
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-2">
+        <label for="sample_collected" class="form-label">Sample Collected</label>
+        <select class="form-select @error('sample_collected') is-invalid @enderror" id="sample_collected" name="sample_collected">
+            <option value="">-- Select --</option>
+            <option value="Yes" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'Yes' ? 'selected' : '' }}>Yes</option>
+            <option value="No" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'No' ? 'selected' : '' }}>No</option>
+            <option value="NA" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'NA' ? 'selected' : '' }}>N/A</option>
+        </select>
+    </div>
+    <div class="col-md-6 mb-2">
+        <label for="referral_type" class="form-label">Referral Type</label>
+        <input type="text" class="form-control @error('referral_type') is-invalid @enderror" id="referral_type" name="referral_type" value="{{ old('referral_type', $patient ? $patient->referral_type : '') }}" placeholder="e.g., Cardiologist, Neurologist..." autocomplete="off" list="referral_types_list">
+        <datalist id="referral_types_list">
+            <option value="Cardiologist">
+            <option value="Neurologist">
+            <option value="Dermatologist">
+            <option value="Orthopedist">
+            <option value="Ophthalmologist">
+            <option value="ENT Specialist">
+            <option value="Gastroenterologist">
+            <option value="Urologist">
+            <option value="Physiotherapist">
+            <option value="Specialist Consultation">
+            <option value="Hospital Admission">
+            <option value="Surgery">
+        </datalist>
+    </div>
+</div>
+
+<div class="mb-2">
+    <label for="referral_details" class="form-label">Referral Details</label>
+    <textarea class="form-control @error('referral_details') is-invalid @enderror" id="referral_details" name="referral_details" rows="2">{{ old('referral_details', $patient ? $patient->referral_details : '') }}</textarea>
+</div>
+
+<!-- Additional Notes -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-sticky"></i> Additional Notes
+</h5>
+
+<div class="mb-2">
+    <label for="notes" class="form-label">Notes</label>
+    <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="2">{{ old('notes', $patient ? $patient->notes : '') }}</textarea>
+</div>

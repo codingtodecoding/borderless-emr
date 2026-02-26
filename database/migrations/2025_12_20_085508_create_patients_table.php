@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('serial_number')->unique();
             $table->foreignId('created_by')->constrained('users')->onDelete('restrict');
-            $table->foreignId('campaign_type_id')->nullable()->constrained('campaign_types')->onDelete('set null');
+            $table->unsignedBigInteger('campaign_type_id')->nullable();
 
             // Basic Information
             $table->string('patient_name');

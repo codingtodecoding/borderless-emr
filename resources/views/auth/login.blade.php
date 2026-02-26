@@ -50,10 +50,10 @@
 
                 <hr class="my-4">
 
-                <p class="text-center text-muted">
-                    Don't have an account?
-                    <a href="{{ route('register') }}" class="text-primary fw-bold">Register here</a>
-                </p>
+                <!--<p class="text-center text-muted">-->
+                <!--    Don't have an account?-->
+                <!--    <a href="{{ route('register') }}" class="text-primary fw-bold">Register here</a>-->
+                <!--</p>-->
             </div>
         </div>
 

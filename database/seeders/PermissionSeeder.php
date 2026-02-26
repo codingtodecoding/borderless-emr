@@ -57,6 +57,18 @@ class PermissionSeeder extends Seeder
             ['name' => 'talukas_edit', 'display_name' => 'Edit Taluka', 'module' => 'talukas', 'action' => 'update', 'description' => 'Can edit taluka details'],
             ['name' => 'talukas_delete', 'display_name' => 'Delete Taluka', 'module' => 'talukas', 'action' => 'delete', 'description' => 'Can delete talukas'],
 
+            // Villages Module
+            ['name' => 'villages_view', 'display_name' => 'View Villages', 'module' => 'villages', 'action' => 'read', 'description' => 'Can view villages list'],
+            ['name' => 'villages_create', 'display_name' => 'Create Village', 'module' => 'villages', 'action' => 'create', 'description' => 'Can create new villages'],
+            ['name' => 'villages_edit', 'display_name' => 'Edit Village', 'module' => 'villages', 'action' => 'update', 'description' => 'Can edit village details'],
+            ['name' => 'villages_delete', 'display_name' => 'Delete Village', 'module' => 'villages', 'action' => 'delete', 'description' => 'Can delete villages'],
+
+            // Lab Tests Module
+            ['name' => 'lab_tests_view', 'display_name' => 'View Lab Tests', 'module' => 'lab_tests', 'action' => 'read', 'description' => 'Can view lab tests list'],
+            ['name' => 'lab_tests_create', 'display_name' => 'Create Lab Test', 'module' => 'lab_tests', 'action' => 'create', 'description' => 'Can create new lab tests'],
+            ['name' => 'lab_tests_edit', 'display_name' => 'Edit Lab Test', 'module' => 'lab_tests', 'action' => 'update', 'description' => 'Can edit lab test details'],
+            ['name' => 'lab_tests_delete', 'display_name' => 'Delete Lab Test', 'module' => 'lab_tests', 'action' => 'delete', 'description' => 'Can delete lab tests'],
+
             // Patients Module
             ['name' => 'patients_view', 'display_name' => 'View Patients', 'module' => 'patients', 'action' => 'read', 'description' => 'Can view patients list'],
             ['name' => 'patients_create', 'display_name' => 'Create Patient', 'module' => 'patients', 'action' => 'create', 'description' => 'Can create new patient records'],
@@ -66,7 +78,25 @@ class PermissionSeeder extends Seeder
             // Analytics Module
             ['name' => 'analytics_view', 'display_name' => 'View Analytics Dashboard', 'module' => 'analytics', 'action' => 'read', 'description' => 'Can view patient health analytics and reports'],
             ['name' => 'analytics_export', 'display_name' => 'Export Analytics Data', 'module' => 'analytics', 'action' => 'export', 'description' => 'Can export analytics data and reports'],
-        ];
+
+            // Complaints Module
+            ['name' => 'complaints_view', 'display_name' => 'View Complaints', 'module' => 'complaints', 'action' => 'read', 'description' => 'Can view complaints list'],
+            ['name' => 'complaints_create', 'display_name' => 'Create Complaint', 'module' => 'complaints', 'action' => 'create', 'description' => 'Can create new complaints'],
+            ['name' => 'complaints_edit', 'display_name' => 'Edit Complaint', 'module' => 'complaints', 'action' => 'update', 'description' => 'Can edit complaint details'],
+            ['name' => 'complaints_delete', 'display_name' => 'Delete Complaint', 'module' => 'complaints', 'action' => 'delete', 'description' => 'Can delete complaints'],
+
+            // Diagnosis Module
+                ['name' => 'diagnoses_view', 'display_name' => 'View Diagnoses', 'module' => 'diagnoses', 'action' => 'read', 'description' => 'Can view diagnoses list'],
+                ['name' => 'diagnoses_create', 'display_name' => 'Create Diagnosis', 'module' => 'diagnoses', 'action' => 'create', 'description' => 'Can create new diagnosis'],
+                ['name' => 'diagnoses_edit', 'display_name' => 'Edit Diagnosis', 'module' => 'diagnoses', 'action' => 'update', 'description' => 'Can edit diagnosis details'],
+                ['name' => 'diagnoses_delete', 'display_name' => 'Delete Diagnosis', 'module' => 'diagnoses', 'action' => 'delete', 'description' => 'Can delete diagnoses'],
+            
+            //Known conditions
+            ['name' => 'known_conditions_view', 'display_name' => 'View Known Conditions', 'module' => 'known_conditions', 'action' => 'read'],
+            ['name' => 'known_conditions_create', 'display_name' => 'Create Known Condition', 'module' => 'known_conditions', 'action' => 'create'],
+            ['name' => 'known_conditions_edit', 'display_name' => 'Edit Known Condition', 'module' => 'known_conditions', 'action' => 'update'],
+            ['name' => 'known_conditions_delete', 'display_name' => 'Delete Known Condition', 'module' => 'known_conditions', 'action' => 'delete'],
+                    ];
 
         // Create permissions
         foreach ($permissions as $permission) {
