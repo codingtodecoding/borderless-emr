@@ -309,7 +309,11 @@ function loadStates() {
     fetch(`/admin/states/by-country/${countryId}`)
         .then(response => response.json())
         .then(data => {
-            data.forEach(state => {
+            // Filter to only show Maharashtra and Jammu and Kashmir
+            const allowedStates = ['Maharashtra', 'Jammu and Kashmir'];
+            const filteredData = data.filter(state => allowedStates.includes(state.name));
+
+            filteredData.forEach(state => {
                 const option = document.createElement('option');
                 option.value = state.id;
                 option.textContent = state.name;
@@ -331,7 +335,11 @@ function loadDistricts() {
     fetch(`/admin/districts/by-state/${stateId}`)
         .then(response => response.json())
         .then(data => {
-            data.forEach(district => {
+            // Filter to only show Sambhaji Nagar, Amravati, Nagpur
+            const allowedDistricts = ['Sambhaji Nagar', 'Amravati', 'Nagpur'];
+            const filteredData = data.filter(district => allowedDistricts.includes(district.name));
+
+            filteredData.forEach(district => {
                 const option = document.createElement('option');
                 option.value = district.id;
                 option.textContent = district.name;
@@ -364,21 +372,28 @@ function loadTalukas() {
 
 // Calculate BMI automatically
 function calculateBMI() {
-    const height = parseFloat(document.getElementById('height').value);
-    const weight = parseFloat(document.getElementById('weight').value);
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
     const bmiDisplay = document.getElementById('bmi_display');
     const bmiInput = document.getElementById('bmi');
+
+    if (!heightInput || !weightInput || !bmiDisplay || !bmiInput) {
+        return;
+    }
+
+    const height = parseFloat(heightInput.value);
+    const weight = parseFloat(weightInput.value);
 
     if (height > 0 && weight > 0) {
         // BMI = weight (kg) / (height in meters)^2
         // Height is in cm, so convert to meters by dividing by 100
         const heightInMeters = height / 100;
         const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(2);
-        bmiDisplay.value = bmi;
-        bmiInput.value = bmi;
+        if (bmiDisplay) bmiDisplay.value = bmi;
+        if (bmiInput) bmiInput.value = bmi;
     } else {
-        bmiDisplay.value = '';
-        bmiInput.value = '';
+        if (bmiDisplay) bmiDisplay.value = '';
+        if (bmiInput) bmiInput.value = '';
     }
 }
 
@@ -476,16 +491,20 @@ function initializeFormElements() {
     const heightField = document.getElementById('height');
     const weightField = document.getElementById('weight');
 
-    if (heightField && !heightField.hasListener) {
+    if (heightField) {
+        // Remove existing listeners to avoid duplicates
+        heightField.removeEventListener('change', calculateBMI);
+        heightField.removeEventListener('input', calculateBMI);
         heightField.addEventListener('change', calculateBMI);
         heightField.addEventListener('input', calculateBMI);
-        heightField.hasListener = true;
     }
 
-    if (weightField && !weightField.hasListener) {
+    if (weightField) {
+        // Remove existing listeners to avoid duplicates
+        weightField.removeEventListener('change', calculateBMI);
+        weightField.removeEventListener('input', calculateBMI);
         weightField.addEventListener('change', calculateBMI);
         weightField.addEventListener('input', calculateBMI);
-        weightField.hasListener = true;
     }
 
     // Calculate BMI if fields have values
@@ -497,7 +516,10 @@ function initializeFormElements() {
     const villageInput = document.getElementById('village');
     const talukaSelect = document.getElementById('taluka_id');
 
-    if (villageInput && !villageInput.hasListener) {
+    if (villageInput) {
+        villageInput.removeEventListener('input', showVillageSuggestions);
+        villageInput.removeEventListener('focus', showVillageSuggestions);
+
         villageInput.addEventListener('input', function() {
             clearTimeout(villageDebounceTimer);
             villageDebounceTimer = setTimeout(() => {
@@ -510,13 +532,11 @@ function initializeFormElements() {
                 showVillageSuggestions();
             }
         });
-
-        villageInput.hasListener = true;
     }
 
-    if (talukaSelect && !talukaSelect.hasListener) {
+    if (talukaSelect) {
+        talukaSelect.removeEventListener('change', loadVillages);
         talukaSelect.addEventListener('change', loadVillages);
-        talukaSelect.hasListener = true;
     }
 }
 
@@ -618,11 +638,13 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('styles')
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
 <style>
-    .lab-tests-container {
+    .lab-tests-container,
+    .referral-types-container {
         position: relative;
     }
 
-    .lab-tests-container .input-group {
+    .lab-tests-container .input-group,
+    .referral-types-container .input-group {
         position: relative;
     }
 
@@ -633,6 +655,9 @@ document.addEventListener('DOMContentLoaded', function() {
         border-radius: 4px;
         min-height: 40px;
         border: 1px solid #e3e6f0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
     }
 
     .selected-tests-list .badge {
@@ -649,12 +674,117 @@ document.addEventListener('DOMContentLoaded', function() {
         font-size: 12px;
     }
 
-    #lab_test_suggestions {
+    #lab_test_suggestions,
+    #referral_type_suggestions {
         margin-top: 2px;
     }
 
-    #lab_test_suggestions > div:hover {
+    #lab_test_suggestions > div:hover,
+    #referral_type_suggestions > div:hover {
         background-color: #f0f0f0;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .table-container {
+            padding: 10px;
+        }
+
+        .card-body {
+            padding: 10px !important;
+        }
+
+        .row {
+            margin-right: -5px;
+            margin-left: -5px;
+        }
+
+        .col-md-2,
+        .col-md-3,
+        .col-md-4,
+        .col-md-6 {
+            padding-right: 5px;
+            padding-left: 5px;
+            margin-bottom: 8px;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 16px;
+            padding: 8px;
+            min-height: 44px;
+        }
+
+        .btn {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            min-height: 44px;
+        }
+
+        h5 {
+            font-size: 0.9rem !important;
+            margin-bottom: 12px !important;
+            padding-bottom: 6px !important;
+        }
+
+        .input-group {
+            flex-wrap: wrap;
+        }
+
+        .input-group .btn {
+            margin-top: 4px;
+            width: 100%;
+        }
+
+        .selected-tests-list .badge {
+            font-size: 12px;
+            padding: 4px 8px;
+        }
+
+        #village-suggestions,
+        #lab_test_suggestions,
+        #referral_type_suggestions {
+            max-height: 150px;
+            font-size: 0.9rem;
+        }
+
+        .d-flex.gap-2 {
+            flex-direction: column;
+        }
+
+        .d-flex.gap-2 .btn {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .col-md-2,
+        .col-md-3,
+        .col-md-4,
+        .col-md-6 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+        }
+
+        .form-control,
+        .form-select {
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        h5 {
+            font-size: 0.85rem !important;
+        }
     }
 </style>
 @endpush
@@ -662,7 +792,123 @@ document.addEventListener('DOMContentLoaded', function() {
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
+// Referral Types List
+const referralTypesList = [
+    'Cardiologist', 'Neurologist', 'Dermatologist', 'Orthopedist',
+    'Ophthalmologist', 'ENT Specialist', 'Gastroenterologist', 'Urologist',
+    'Physiotherapist', 'Specialist Consultation', 'Hospital Admission', 'Surgery'
+];
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Referral Types handler
+    const referralTypeInput = document.getElementById('referral_type_input');
+    const addReferralTypeBtn = document.getElementById('add_referral_type_btn');
+    const selectedReferralTypes = document.getElementById('selected_referral_types');
+    const referralTypesHidden = document.getElementById('referral_types_hidden');
+    let selectedTypes = [];
+
+    if (referralTypeInput) {
+        // Initialize selected types from old values or existing badges
+        selectedReferralTypes.querySelectorAll('.badge input[name="referral_types[]"]').forEach(input => {
+            selectedTypes.push(input.value);
+        });
+
+        // Referral type input autocomplete
+        referralTypeInput.addEventListener('input', function(e) {
+            const value = this.value.toLowerCase();
+            const suggestions = document.getElementById('referral_type_suggestions');
+
+            if (!value) {
+                if (suggestions) suggestions.remove();
+                return;
+            }
+
+            const filtered = referralTypesList.filter(type =>
+                type.toLowerCase().includes(value) &&
+                !selectedTypes.includes(type)
+            );
+
+            if (filtered.length === 0) {
+                if (suggestions) suggestions.remove();
+                return;
+            }
+
+            let suggestionsEl = document.getElementById('referral_type_suggestions');
+            if (!suggestionsEl) {
+                suggestionsEl = document.createElement('div');
+                suggestionsEl.id = 'referral_type_suggestions';
+                suggestionsEl.style.cssText = 'position:absolute;background:white;border:1px solid #ccc;width:100%;max-height:200px;overflow-y:auto;z-index:1000;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1);';
+                referralTypeInput.parentElement.style.position = 'relative';
+                referralTypeInput.parentElement.appendChild(suggestionsEl);
+            }
+
+            suggestionsEl.innerHTML = filtered.map(type =>
+                `<div class="p-2" style="cursor:pointer;border-bottom:1px solid #eee;" data-type="${type}">
+                    <i class="bi bi-arrow-up-right-square"></i> ${type}
+                </div>`
+            ).join('');
+
+            suggestionsEl.querySelectorAll('div[data-type]').forEach(el => {
+                el.addEventListener('click', function() {
+                    addReferralType(this.getAttribute('data-type'));
+                    referralTypeInput.value = '';
+                    suggestionsEl.innerHTML = '';
+                });
+            });
+        });
+
+        // Add referral type on button click or Enter key
+        if (addReferralTypeBtn) {
+            addReferralTypeBtn.addEventListener('click', function() {
+                const type = referralTypeInput.value.trim();
+                if (type && !selectedTypes.includes(type)) {
+                    addReferralType(type);
+                    referralTypeInput.value = '';
+                }
+            });
+        }
+
+        referralTypeInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const type = this.value.trim();
+                if (type && !selectedTypes.includes(type)) {
+                    addReferralType(type);
+                    this.value = '';
+                }
+            }
+        });
+
+        function addReferralType(typeName) {
+            if (selectedTypes.includes(typeName)) return;
+
+            selectedTypes.push(typeName);
+
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-primary me-2 mb-2';
+            badge.innerHTML = `${typeName}
+                <input type="hidden" name="referral_types[]" value="${typeName}">
+                <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove(); selectedReferralTypes.dispatchEvent(new Event('change'));"></button>`;
+
+            selectedReferralTypes.appendChild(badge);
+            updateReferralTypesHidden();
+        }
+
+        function updateReferralTypesHidden() {
+            const types = Array.from(selectedReferralTypes.querySelectorAll('input[name="referral_types[]"]')).map(input => input.value);
+            referralTypesHidden.value = types.join(',');
+            selectedTypes = types;
+        }
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (referralTypeInput && e.target !== referralTypeInput) {
+                const suggestions = document.getElementById('referral_type_suggestions');
+                if (suggestions) suggestions.remove();
+            }
+        });
+    }
+
     // Initialize Tom Select for multi-select fields
     function initTomSelect(selectId, hiddenId, existingValues) {
         const select = document.getElementById(selectId);

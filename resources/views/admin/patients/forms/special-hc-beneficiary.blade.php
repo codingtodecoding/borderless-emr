@@ -3,45 +3,17 @@
     $patient = $patient ?? null;
 @endphp
 
-<!-- Basic Information Section -->
-<h5 class="mb-2" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-person-vcard"></i> Basic Information
+<!-- Topic Section -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-info-circle"></i> Topic
 </h5>
 
-<div class="row">
-    <div class="col-md-4 mb-2">
-        <label for="patient_name" class="form-label">Patient Name <span style="color: red;">*</span></label>
-        <input type="text" class="form-control @error('patient_name') is-invalid @enderror" id="patient_name" name="patient_name" value="{{ old('patient_name', ($patient ? $patient->patient_name : '')) }}" required>
-        @error('patient_name')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="age" class="form-label">Age <span style="color: red;">*</span></label>
-        <input type="number" class="form-control @error('age') is-invalid @enderror" id="age" name="age" value="{{ old('age', ($patient ? $patient->age : '')) }}" min="0" max="150" required>
-        @error('age')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="sex" class="form-label">Sex <span style="color: red;">*</span></label>
-        <select class="form-select @error('sex') is-invalid @enderror" id="sex" name="sex" required>
-            <option value="">-- Select --</option>
-            <option value="Male" {{ old('sex', ($patient ? $patient->sex : '')) == 'Male' ? 'selected' : '' }}>Male</option>
-            <option value="Female" {{ old('sex', ($patient ? $patient->sex : '')) == 'Female' ? 'selected' : '' }}>Female</option>
-            <option value="Other" {{ old('sex', ($patient ? $patient->sex : '')) == 'Other' ? 'selected' : '' }}>Other</option>
-        </select>
-        @error('sex')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-2 mb-2">
-        <label for="date" class="form-label">Date <span style="color: red;">*</span></label>
-        <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $patient->date ?? date('Y-m-d')) }}" required>
-        @error('date')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
+<div class="mb-2">
+    <label for="topic_covered" class="form-label">Topic <span style="color: red;">*</span></label>
+    <input type="text" class="form-control @error('topic_covered') is-invalid @enderror" id="topic_covered" name="topic_covered" value="{{ old('topic_covered', $patient ? $patient->topic_covered : '') }}" placeholder="e.g., Health Awareness, Disease Prevention..." required>
+    @error('topic_covered')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
 </div>
 
 <!-- Location Details Section -->
@@ -211,28 +183,33 @@
     <i class="bi bi-arrow-up-right-square"></i> Referral
 </h5>
 
-<div class="row">
-    <div class="col-md-6 mb-2">
-        <label for="referral_type" class="form-label">Referral Type</label>
-        <input type="text" class="form-control @error('referral_type') is-invalid @enderror" id="referral_type" name="referral_type" value="{{ old('referral_type', ($patient ? $patient->referral_type : '')) }}" placeholder="e.g., Cardiologist, Neurologist..." autocomplete="off" list="referral_types_list">
-        <datalist id="referral_types_list">
-            <option value="Cardiologist">
-            <option value="Neurologist">
-            <option value="Dermatologist">
-            <option value="Orthopedist">
-            <option value="Ophthalmologist">
-            <option value="ENT Specialist">
-            <option value="Gastroenterologist">
-            <option value="Urologist">
-            <option value="Physiotherapist">
-            <option value="Specialist Consultation">
-            <option value="Hospital Admission">
-            <option value="Surgery">
-        </datalist>
-        @error('referral_type')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
+<div class="mb-3">
+    <label class="form-label">Referral Type (Add Multiple)</label>
+    <div class="referral-types-container">
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="referral_type_input" placeholder="Search and add referral types..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="add_referral_type_btn">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
+        </div>
+        <div id="selected_referral_types" class="selected-tests-list">
+            @php
+                $referralTypes = old('referral_types', $patient && isset($patient->referral_type) ? explode(',', $patient->referral_type) : []);
+            @endphp
+            @if($referralTypes && is_array($referralTypes))
+                @foreach($referralTypes as $type)
+                    @if(trim($type))
+                    <span class="badge bg-primary me-2 mb-2">
+                        {{ trim($type) }}
+                        <input type="hidden" name="referral_types[]" value="{{ trim($type) }}">
+                        <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove()"></button>
+                    </span>
+                    @endif
+                @endforeach
+            @endif
+        </div>
     </div>
+    <input type="hidden" id="referral_types_hidden" name="referral_type" value="{{ old('referral_type', $patient ? $patient->referral_type : '') }}">
 </div>
 
 <div class="mb-2">

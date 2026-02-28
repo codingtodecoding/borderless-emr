@@ -3,47 +3,6 @@
     $patient = $patient ?? null;
 @endphp
 
-<!-- Basic Information Section -->
-<h5 class="mb-2" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-person-vcard"></i> Basic Information
-</h5>
-
-<div class="row">
-    <div class="col-md-4 mb-2">
-        <label for="patient_name" class="form-label">Patient Name <span style="color: red;">*</span></label>
-        <input type="text" class="form-control @error('patient_name') is-invalid @enderror" id="patient_name" name="patient_name" value="{{ old('patient_name', ($patient ? $patient->patient_name : '')) }}" required>
-        @error('patient_name')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="age" class="form-label">Age <span style="color: red;">*</span></label>
-        <input type="number" class="form-control @error('age') is-invalid @enderror" id="age" name="age" value="{{ old('age', ($patient ? $patient->age : '')) }}" min="0" max="150" required>
-        @error('age')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="sex" class="form-label">Sex <span style="color: red;">*</span></label>
-        <select class="form-select @error('sex') is-invalid @enderror" id="sex" name="sex" required>
-            <option value="">-- Select --</option>
-            <option value="Male" {{ old('sex', ($patient ? $patient->sex : '')) == 'Male' ? 'selected' : '' }}>Male</option>
-            <option value="Female" {{ old('sex', ($patient ? $patient->sex : '')) == 'Female' ? 'selected' : '' }}>Female</option>
-            <option value="Other" {{ old('sex', ($patient ? $patient->sex : '')) == 'Other' ? 'selected' : '' }}>Other</option>
-        </select>
-        @error('sex')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-2 mb-2">
-        <label for="date" class="form-label">Date <span style="color: red;">*</span></label>
-        <input type="date" class="form-control @error('date') is-invalid @enderror" id="date" name="date" value="{{ old('date', $patient->date ?? date('Y-m-d')) }}" required>
-        @error('date')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-</div>
-
 <!-- Location Details Section -->
 <h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
     <i class="bi bi-geo-alt"></i> Location Details
