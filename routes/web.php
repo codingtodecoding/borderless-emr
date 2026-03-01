@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\DiagnosisController;
 use App\Http\Controllers\Admin\TreatmentController;
 use App\Http\Controllers\Admin\KnownConditionController;
 use App\Http\Controllers\Admin\LabTestController;
+use App\Http\Controllers\Admin\MigrationController;
 use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,13 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->middleware('permission:view_dashboard')
         ->name('dashboard');
+
+    // Database Migrations - admin only
+    Route::prefix('migrations')->name('migrations.')->middleware('permission:users_view')->group(function () {
+        Route::post('/run', [MigrationController::class, 'runMigrations'])->name('run');
+        Route::get('/status', [MigrationController::class, 'getMigrationStatus'])->name('status');
+        Route::post('/rollback', [MigrationController::class, 'rollbackMigrations'])->name('rollback');
+    });
 
     // Users management - admin only
     Route::middleware('permission:users_view,users_create,users_edit,users_delete')->group(function () {
