@@ -14,6 +14,10 @@
 <div class="table-container">
     <div class="card">
         <div class="card-body" style="padding: 1.25rem 1.5rem;">
+            @php
+                $patient = $patient ?? null;
+            @endphp
+
             <form method="POST" action="{{ route('admin.patients.store') }}" id="patientForm">
                 @csrf
 
@@ -70,6 +74,80 @@
                             @endforeach
                         </select>
                         @error('campaign_type_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Shared Location Details Section -->
+                <h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+                    <i class="bi bi-geo-alt"></i> Location Details
+                </h5>
+
+                <div class="row">
+                    <div class="col-md-3 mb-2">
+                        <label for="country_id" class="form-label">Country <span style="color: red;">*</span></label>
+                        <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id" onchange="loadStates()" required>
+                            <option value="">-- Select Country --</option>
+                            @foreach ($countries as $country)
+                                <option value="{{ $country->id }}" {{ old('country_id') ? (old('country_id') == $country->id ? 'selected' : '') : ($patient && $patient->country_id ? ($patient->country_id == $country->id ? 'selected' : '') : ($country->name === 'India' ? 'selected' : '')) }}>
+                                    {{ $country->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('country_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label for="state_id" class="form-label">State <span style="color: red;">*</span></label>
+                        <select class="form-select @error('state_id') is-invalid @enderror" id="state_id" name="state_id" onchange="loadDistricts()" required>
+                            <option value="">-- Select State --</option>
+                        </select>
+                        @error('state_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label for="district_id" class="form-label">District <span style="color: red;">*</span></label>
+                        <select class="form-select @error('district_id') is-invalid @enderror" id="district_id" name="district_id" onchange="loadTalukas()" required>
+                            <option value="">-- Select District --</option>
+                        </select>
+                        @error('district_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label for="taluka_id" class="form-label">Taluka <span style="color: red;">*</span></label>
+                        <select class="form-select @error('taluka_id') is-invalid @enderror" id="taluka_id" name="taluka_id" onchange="loadVillages()" required>
+                            <option value="">-- Select Taluka --</option>
+                        </select>
+                        @error('taluka_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <label for="village" class="form-label">Village <span style="color: red;">*</span></label>
+                        <input type="text" class="form-control @error('village') is-invalid @enderror" id="village" name="village" value="{{ old('village') }}" placeholder="Search village..." autocomplete="off" required>
+                        <div id="village-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2px;"></div>
+                        @error('village')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="mobile" class="form-label">Mobile <span style="color: red;">*</span></label>
+                        <input type="tel" class="form-control @error('mobile') is-invalid @enderror" id="mobile" name="mobile" value="{{ old('mobile') }}" placeholder="10 digit mobile number" maxlength="10" required>
+                        @error('mobile')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label for="aadhar" class="form-label">Aadhar</label>
+                        <input type="text" class="form-control @error('aadhar') is-invalid @enderror" id="aadhar" name="aadhar" value="{{ old('aadhar') }}" placeholder="12 digit aadhar number" maxlength="12">
+                        @error('aadhar')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
@@ -309,11 +387,8 @@ function loadStates() {
     fetch(`/admin/states/by-country/${countryId}`)
         .then(response => response.json())
         .then(data => {
-            // Filter to only show Maharashtra and Jammu and Kashmir
-            const allowedStates = ['Maharashtra', 'Jammu and Kashmir'];
-            const filteredData = data.filter(state => allowedStates.includes(state.name));
-
-            filteredData.forEach(state => {
+            // Show all states
+            data.forEach(state => {
                 const option = document.createElement('option');
                 option.value = state.id;
                 option.textContent = state.name;
@@ -335,11 +410,8 @@ function loadDistricts() {
     fetch(`/admin/districts/by-state/${stateId}`)
         .then(response => response.json())
         .then(data => {
-            // Filter to only show Sambhaji Nagar, Amravati, Nagpur
-            const allowedDistricts = ['Sambhaji Nagar', 'Amravati', 'Nagpur'];
-            const filteredData = data.filter(district => allowedDistricts.includes(district.name));
-
-            filteredData.forEach(district => {
+            // Show all districts
+            data.forEach(district => {
                 const option = document.createElement('option');
                 option.value = district.id;
                 option.textContent = district.name;
@@ -371,11 +443,22 @@ function loadTalukas() {
 }
 
 // Calculate BMI automatically
-function calculateBMI() {
-    const heightInput = document.getElementById('height');
-    const weightInput = document.getElementById('weight');
-    const bmiDisplay = document.getElementById('bmi_display');
-    const bmiInput = document.getElementById('bmi');
+function calculateBMI(event) {
+    // Find the visible campaign form that contains the height/weight fields
+    let form = null;
+    if (event && event.target) {
+        form = event.target.closest('.campaign-form') || document.querySelector('.campaign-form[style*="block"]');
+    } else {
+        form = document.querySelector('.campaign-form[style*="block"]');
+    }
+
+    if (!form) return;
+
+    // Scope all lookups to the visible form
+    const heightInput = form.querySelector('#height');
+    const weightInput = form.querySelector('#weight');
+    const bmiDisplay = form.querySelector('#bmi_display');
+    const bmiInput = form.querySelector('#bmi');
 
     if (!heightInput || !weightInput || !bmiDisplay || !bmiInput) {
         return;
@@ -485,32 +568,96 @@ function displaySuggestions(villages) {
     });
 }
 
+// Store Tom Select instances keyed by element reference
+const tomSelectInstances = new Map();
+
+// Build Tom Select on a specific element
+function buildTomSelect(selectEl, hiddenEl, placeholder) {
+    // Destroy any existing instance on this element
+    if (selectEl.tomselect) {
+        selectEl.tomselect.destroy();
+    }
+
+    const hiddenValue = hiddenEl ? (hiddenEl.value || '') : '';
+    const items = hiddenValue ? hiddenValue.split(',').map(v => v.trim()).filter(v => v) : [];
+
+    new TomSelect(selectEl, {
+        plugins: ['remove_button'],
+        delimiter: ',',
+        create: false,
+        maxOptions: 300,
+        maxItems: null,
+        items: items,
+        placeholder: placeholder,
+        searchField: ['text'],
+        hideSelected: false,
+        closeAfterSelect: false,
+        diacritics: true,
+        onChange: function(value) {
+            if (hiddenEl) hiddenEl.value = value.join(',');
+        },
+        render: {
+            option: function(data, escape) {
+                return '<div class="py-2 px-3">' + escape(data.text) + '</div>';
+            },
+            item: function(data, escape) {
+                return '<span class="badge bg-primary me-1 mb-1">' + escape(data.text) + '</span>';
+            }
+        }
+    });
+}
+
+// Initialize Tom Select scoped to the currently visible campaign form
+function reinitializeTomSelect() {
+    // Find the currently visible campaign form container
+    const visibleForm = document.querySelector('.campaign-form[style*="block"]')
+                     || document.querySelector('.campaign-form:not([style*="none"])');
+
+    if (!visibleForm) return;
+
+    const fieldConfigs = [
+        { selectName: 'complaints_select',      hiddenName: 'complaints_hidden',      placeholder: 'Search complaints...' },
+        { selectName: 'known_conditions_select', hiddenName: 'known_conditions_hidden', placeholder: 'Search conditions...' },
+        { selectName: 'diagnosis_select',        hiddenName: 'diagnosis_hidden',        placeholder: 'Search diagnosis...' },
+        { selectName: 'treatment_select',        hiddenName: 'treatment_hidden',        placeholder: 'Search treatments...' }
+    ];
+
+    fieldConfigs.forEach(config => {
+        // Scope to the VISIBLE form — avoids getElementById returning wrong (hidden) element
+        const selectEl = visibleForm.querySelector('#' + config.selectName);
+        const hiddenEl = visibleForm.querySelector('#' + config.hiddenName);
+
+        if (!selectEl) return;
+
+        try {
+            buildTomSelect(selectEl, hiddenEl, config.placeholder);
+        } catch (e) {
+            console.error('Tom Select init failed for ' + config.selectName, e);
+        }
+    });
+}
+
 // Initialize form elements (height, weight, village autocomplete, etc.)
+// Global BMI change handler - works for any visible form
+function handleBMIChange(e) {
+    if (e.target.id === 'height' || e.target.id === 'weight') {
+        calculateBMI(e);
+    }
+}
+
 function initializeFormElements() {
-    // BMI calculation
-    const heightField = document.getElementById('height');
-    const weightField = document.getElementById('weight');
+    // BMI calculation using event delegation
+    // This works for ANY visible campaign form (general-screening, special-hc, awareness-camp)
+    // Remove old listeners from document to prevent duplicates
+    document.removeEventListener('change', handleBMIChange);
+    document.removeEventListener('input', handleBMIChange);
 
-    if (heightField) {
-        // Remove existing listeners to avoid duplicates
-        heightField.removeEventListener('change', calculateBMI);
-        heightField.removeEventListener('input', calculateBMI);
-        heightField.addEventListener('change', calculateBMI);
-        heightField.addEventListener('input', calculateBMI);
-    }
+    // Attach delegated listeners to catch height/weight changes in ANY visible form
+    document.addEventListener('change', handleBMIChange);
+    document.addEventListener('input', handleBMIChange);
 
-    if (weightField) {
-        // Remove existing listeners to avoid duplicates
-        weightField.removeEventListener('change', calculateBMI);
-        weightField.removeEventListener('input', calculateBMI);
-        weightField.addEventListener('change', calculateBMI);
-        weightField.addEventListener('input', calculateBMI);
-    }
-
-    // Calculate BMI if fields have values
-    if (heightField || weightField) {
-        calculateBMI();
-    }
+    // Calculate BMI on initialization
+    calculateBMI();
 
     // Village autocomplete
     const villageInput = document.getElementById('village');
@@ -538,6 +685,9 @@ function initializeFormElements() {
         talukaSelect.removeEventListener('change', loadVillages);
         talukaSelect.addEventListener('change', loadVillages);
     }
+
+    // Reinitialize Tom Select for the visible form
+    reinitializeTomSelect();
 }
 
 // Load initial cascading dropdowns on page load if values exist
@@ -569,8 +719,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 const selectedForm = document.getElementById('form-campaign-' + campaignTypeId);
                 if (selectedForm) {
                     selectedForm.style.display = 'block';
-                    // Re-initialize form elements if needed
-                    initializeFormElements();
+                    // Re-initialize form elements after brief delay to ensure DOM is ready
+                    setTimeout(() => {
+                        initializeFormElements();
+                    }, 50);
+                    // Always load states for the campaign form
+                    const countryId = document.getElementById('country_id').value;
+                    if (countryId) {
+                        loadStates();
+                    }
                 }
             } else {
                 if (formDefault) {
@@ -597,8 +754,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize form elements
-    initializeFormElements();
+    // Initialize form elements with a slight delay to ensure DOM is ready
+    setTimeout(() => {
+        initializeFormElements();
+    }, 100);
 
     // Hide suggestions when clicking outside
     document.addEventListener('click', function(e) {
@@ -610,6 +769,37 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Set India as default country and load all states
+    const countrySelect = document.getElementById('country_id');
+    if (countrySelect && !countrySelect.value) {
+        const options = countrySelect.querySelectorAll('option');
+        for (let option of options) {
+            if (option.textContent.trim() === 'India') {
+                countrySelect.value = option.value;
+                break;
+            }
+        }
+    }
+
+    // Load states for India by default (show all states without requiring country selection)
+    const countryId = countrySelect.value;
+    if (countryId) {
+        fetch(`/admin/states/by-country/${countryId}`)
+            .then(response => response.json())
+            .then(data => {
+                const stateSelect = document.getElementById('state_id');
+                stateSelect.innerHTML = '<option value="">-- Select State --</option>';
+                // Show all states
+                data.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.id;
+                    option.textContent = state.name;
+                    stateSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error loading states:', error));
+    }
 
     @if(old('country_id'))
         loadStates();
@@ -786,6 +976,81 @@ document.addEventListener('DOMContentLoaded', function() {
             font-size: 0.85rem !important;
         }
     }
+
+    /* Tom Select Autocomplete Enhancements */
+    .ts-wrapper {
+        width: 100%;
+    }
+
+    .ts-control {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        padding: 6px 8px;
+        min-height: auto;
+    }
+
+    .ts-control.focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .ts-control input {
+        padding: 4px 0 !important;
+        min-height: auto !important;
+    }
+
+    .ts-dropdown {
+        border: 1px solid #ced4da;
+        border-radius: 0.375rem;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        max-height: 300px;
+    }
+
+    .ts-dropdown [data-selectable] {
+        cursor: pointer;
+        padding: 8px 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .ts-dropdown [data-selectable]:hover {
+        background-color: #e7f3ff;
+        color: #0d6efd;
+    }
+
+    .ts-dropdown [data-selected] {
+        display: none;
+    }
+
+    .ts-dropdown-content {
+        padding: 0;
+    }
+
+    .ts-item {
+        background-color: #0d6efd;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        margin-right: 4px;
+        font-size: 13px;
+    }
+
+    .ts-item.selected {
+        background-color: #0d6efd;
+    }
+
+    .ts-item .ts-item-remove {
+        cursor: pointer;
+        margin-left: 4px;
+    }
+
+    .ts-item .ts-item-remove:hover {
+        opacity: 0.7;
+    }
+
+    /* Search highlight in dropdown */
+    .ts-dropdown [data-selectable].highlight {
+        background-color: #fff3cd;
+    }
 </style>
 @endpush
 
@@ -799,241 +1064,149 @@ const referralTypesList = [
     'Physiotherapist', 'Specialist Consultation', 'Hospital Admission', 'Surgery'
 ];
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Referral Types handler
-    const referralTypeInput = document.getElementById('referral_type_input');
-    const addReferralTypeBtn = document.getElementById('add_referral_type_btn');
-    const selectedReferralTypes = document.getElementById('selected_referral_types');
-    const referralTypesHidden = document.getElementById('referral_types_hidden');
-    let selectedTypes = [];
+// ─── Lab Tests & Referral Types: Event Delegation ───────────────────────────
+// Uses event delegation so handlers work for ANY visible campaign form,
+// avoiding the getElementById-returns-first-match problem.
 
-    if (referralTypeInput) {
-        // Initialize selected types from old values or existing badges
-        selectedReferralTypes.querySelectorAll('.badge input[name="referral_types[]"]').forEach(input => {
-            selectedTypes.push(input.value);
-        });
+const labTestsData = @json($labTests->pluck('name')->toArray());
 
-        // Referral type input autocomplete
-        referralTypeInput.addEventListener('input', function(e) {
-            const value = this.value.toLowerCase();
-            const suggestions = document.getElementById('referral_type_suggestions');
+// Helper: get the visible campaign form container from any child element
+function getVisibleForm(el) {
+    return el.closest('.campaign-form') || null;
+}
 
-            if (!value) {
-                if (suggestions) suggestions.remove();
-                return;
-            }
-
-            const filtered = referralTypesList.filter(type =>
-                type.toLowerCase().includes(value) &&
-                !selectedTypes.includes(type)
-            );
-
-            if (filtered.length === 0) {
-                if (suggestions) suggestions.remove();
-                return;
-            }
-
-            let suggestionsEl = document.getElementById('referral_type_suggestions');
-            if (!suggestionsEl) {
-                suggestionsEl = document.createElement('div');
-                suggestionsEl.id = 'referral_type_suggestions';
-                suggestionsEl.style.cssText = 'position:absolute;background:white;border:1px solid #ccc;width:100%;max-height:200px;overflow-y:auto;z-index:1000;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1);';
-                referralTypeInput.parentElement.style.position = 'relative';
-                referralTypeInput.parentElement.appendChild(suggestionsEl);
-            }
-
-            suggestionsEl.innerHTML = filtered.map(type =>
-                `<div class="p-2" style="cursor:pointer;border-bottom:1px solid #eee;" data-type="${type}">
-                    <i class="bi bi-arrow-up-right-square"></i> ${type}
-                </div>`
-            ).join('');
-
-            suggestionsEl.querySelectorAll('div[data-type]').forEach(el => {
-                el.addEventListener('click', function() {
-                    addReferralType(this.getAttribute('data-type'));
-                    referralTypeInput.value = '';
-                    suggestionsEl.innerHTML = '';
-                });
-            });
-        });
-
-        // Add referral type on button click or Enter key
-        if (addReferralTypeBtn) {
-            addReferralTypeBtn.addEventListener('click', function() {
-                const type = referralTypeInput.value.trim();
-                if (type && !selectedTypes.includes(type)) {
-                    addReferralType(type);
-                    referralTypeInput.value = '';
-                }
-            });
-        }
-
-        referralTypeInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const type = this.value.trim();
-                if (type && !selectedTypes.includes(type)) {
-                    addReferralType(type);
-                    this.value = '';
-                }
-            }
-        });
-
-        function addReferralType(typeName) {
-            if (selectedTypes.includes(typeName)) return;
-
-            selectedTypes.push(typeName);
-
-            const badge = document.createElement('span');
-            badge.className = 'badge bg-primary me-2 mb-2';
-            badge.innerHTML = `${typeName}
-                <input type="hidden" name="referral_types[]" value="${typeName}">
-                <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove(); selectedReferralTypes.dispatchEvent(new Event('change'));"></button>`;
-
-            selectedReferralTypes.appendChild(badge);
-            updateReferralTypesHidden();
-        }
-
-        function updateReferralTypesHidden() {
-            const types = Array.from(selectedReferralTypes.querySelectorAll('input[name="referral_types[]"]')).map(input => input.value);
-            referralTypesHidden.value = types.join(',');
-            selectedTypes = types;
-        }
-
-        // Close suggestions when clicking outside
-        document.addEventListener('click', function(e) {
-            if (referralTypeInput && e.target !== referralTypeInput) {
-                const suggestions = document.getElementById('referral_type_suggestions');
-                if (suggestions) suggestions.remove();
-            }
-        });
+// Helper: show autocomplete suggestions list below the input
+function showSuggestions(inputEl, suggestions, onSelect) {
+    const container = inputEl.closest('.input-group');
+    let suggestionsEl = container.querySelector('.autocomplete-suggestions');
+    if (!suggestionsEl) {
+        suggestionsEl = document.createElement('div');
+        suggestionsEl.className = 'autocomplete-suggestions';
+        suggestionsEl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ccc;max-height:200px;overflow-y:auto;z-index:9999;border-radius:4px;box-shadow:0 4px 8px rgba(0,0,0,0.15);';
+        container.style.position = 'relative';
+        container.appendChild(suggestionsEl);
     }
-
-    // Initialize Tom Select for multi-select fields
-    function initTomSelect(selectId, hiddenId, existingValues) {
-        const select = document.getElementById(selectId);
-        if (!select) return;
-
-        const items = existingValues ? existingValues.split(',').map(v => v.trim()).filter(v => v.length > 0) : [];
-
-        const ts = new TomSelect('#' + selectId, {
-            plugins: ['remove_button'],
-            delimiter: ',',
-            create: true,
-            createOnBlur: true,
-            items: items,
-            onChange: function(value) {
-                // Update hidden input with comma-separated values
-                document.getElementById(hiddenId).value = value;
-            }
+    suggestionsEl.innerHTML = suggestions.map(s =>
+        `<div class="p-2" style="cursor:pointer;border-bottom:1px solid #eee;" data-value="${s}">${s}</div>`
+    ).join('');
+    suggestionsEl.querySelectorAll('[data-value]').forEach(item => {
+        item.addEventListener('mousedown', function(e) {
+            e.preventDefault(); // keep focus on input
+            onSelect(this.dataset.value);
+            suggestionsEl.innerHTML = '';
+            inputEl.value = '';
         });
-    }
+        item.addEventListener('mouseover', () => item.style.background = '#e7f3ff');
+        item.addEventListener('mouseout', () => item.style.background = '');
+    });
+}
 
-    // Initialize all select fields with TomSelect for multi-select
-    initTomSelect('complaints_select', 'complaints_hidden', '{{ old("complaints") }}');
-    initTomSelect('known_conditions_select', 'known_conditions_hidden', '{{ old("known_conditions") }}');
-    initTomSelect('diagnosis_select', 'diagnosis_hidden', '{{ old("diagnosis") }}');
-    initTomSelect('treatment_select', 'treatment_hidden', '{{ old("treatment") }}');
+// Helper: add a removable badge to a container
+function addBadge(container, value, inputName) {
+    const badge = document.createElement('span');
+    badge.className = 'badge bg-primary me-2 mb-2 d-inline-flex align-items-center';
+    badge.innerHTML = `${value}
+        <input type="hidden" name="${inputName}" value="${value}">
+        <button type="button" class="btn-close btn-close-white ms-1" style="font-size:0.6rem;" aria-label="Remove"></button>`;
+    badge.querySelector('.btn-close').addEventListener('click', () => badge.remove());
+    container.appendChild(badge);
+}
 
-    // Lab Tests Autocomplete
-    const labTestsData = @json($labTests->pluck('name')->toArray());
-    const labTestInput = document.getElementById('lab_test_input');
-    const addLabTestBtn = document.getElementById('add_lab_test_btn');
-    const selectedLabTests = document.getElementById('selected_lab_tests');
-    let selectedTests = [];
+// ── Delegated listener on the whole form ──
+document.getElementById('patientForm').addEventListener('input', function(e) {
+    const form = getVisibleForm(e.target);
+    if (!form) return;
 
-    // Initialize selected tests from old values
-    @if(old('lab_tests'))
-        selectedTests = @json(old('lab_tests'));
-    @endif
-
-    // Lab test input autocomplete
-    labTestInput.addEventListener('input', function(e) {
-        const value = this.value.toLowerCase();
-        const suggestions = document.getElementById('lab_test_suggestions');
-
-        if (!value) {
-            if (suggestions) suggestions.remove();
+    // Lab test autocomplete
+    if (e.target.id === 'lab_test_input') {
+        const input = e.target;
+        const value = input.value.toLowerCase().trim();
+        const selectedList = form.querySelector('#selected_lab_tests');
+        const already = Array.from(selectedList.querySelectorAll('input[name="lab_tests[]"]')).map(i => i.value);
+        const filtered = labTestsData.filter(t => t.toLowerCase().includes(value) && !already.includes(t));
+        if (!value || !filtered.length) {
+            const s = input.closest('.input-group').querySelector('.autocomplete-suggestions');
+            if (s) s.innerHTML = '';
             return;
         }
-
-        const filtered = labTestsData.filter(test =>
-            test.toLowerCase().includes(value) &&
-            !selectedTests.includes(test)
-        );
-
-        if (filtered.length === 0) {
-            if (suggestions) suggestions.remove();
-            return;
-        }
-
-        // Create or update suggestions dropdown
-        let suggestionsEl = document.getElementById('lab_test_suggestions');
-        if (!suggestionsEl) {
-            suggestionsEl = document.createElement('div');
-            suggestionsEl.id = 'lab_test_suggestions';
-            suggestionsEl.style.cssText = 'position:absolute;background:white;border:1px solid #ccc;width:100%;max-height:200px;overflow-y:auto;z-index:1000;border-radius:4px;box-shadow:0 2px 4px rgba(0,0,0,0.1);';
-            labTestInput.parentElement.style.position = 'relative';
-            labTestInput.parentElement.appendChild(suggestionsEl);
-        }
-
-        suggestionsEl.innerHTML = filtered.map(test =>
-            `<div class="p-2" style="cursor:pointer;border-bottom:1px solid #eee;" data-test="${test}">
-                <i class="bi bi-flask"></i> ${test}
-            </div>`
-        ).join('');
-
-        // Add click handlers to suggestions
-        suggestionsEl.querySelectorAll('div[data-test]').forEach(el => {
-            el.addEventListener('click', function() {
-                addLabTest(this.getAttribute('data-test'));
-                labTestInput.value = '';
-                suggestionsEl.innerHTML = '';
-            });
+        showSuggestions(input, filtered, val => {
+            addBadge(selectedList, val, 'lab_tests[]');
         });
-    });
-
-    // Add lab test on button click or Enter key
-    addLabTestBtn.addEventListener('click', function() {
-        const test = labTestInput.value.trim();
-        if (test && labTestsData.includes(test) && !selectedTests.includes(test)) {
-            addLabTest(test);
-            labTestInput.value = '';
-        }
-    });
-
-    labTestInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const test = this.value.trim();
-            if (test && labTestsData.includes(test) && !selectedTests.includes(test)) {
-                addLabTest(test);
-                this.value = '';
-            }
-        }
-    });
-
-    function addLabTest(testName) {
-        if (selectedTests.includes(testName)) return;
-
-        selectedTests.push(testName);
-
-        const badge = document.createElement('span');
-        badge.className = 'badge bg-primary me-2 mb-2';
-        badge.innerHTML = `${testName}
-            <input type="hidden" name="lab_tests[]" value="${testName}">
-            <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove(); selectedTests = selectedTests.filter(t => t !== '${testName}');"></button>`;
-
-        selectedLabTests.appendChild(badge);
     }
 
-    // Close suggestions when clicking outside
-    document.addEventListener('click', function(e) {
-        if (e.target !== labTestInput) {
-            const suggestions = document.getElementById('lab_test_suggestions');
-            if (suggestions) suggestions.remove();
+    // Referral type autocomplete
+    if (e.target.id === 'referral_type_input') {
+        const input = e.target;
+        const value = input.value.toLowerCase().trim();
+        const selectedList = form.querySelector('#selected_referral_types');
+        const already = Array.from(selectedList.querySelectorAll('input[name="referral_types[]"]')).map(i => i.value);
+        const filtered = referralTypesList.filter(t => t.toLowerCase().includes(value) && !already.includes(t));
+        if (!value || !filtered.length) {
+            const s = input.closest('.input-group').querySelector('.autocomplete-suggestions');
+            if (s) s.innerHTML = '';
+            return;
         }
-    });
+        showSuggestions(input, filtered, val => {
+            const hidden = form.querySelector('#referral_types_hidden');
+            addBadge(selectedList, val, 'referral_types[]');
+            if (hidden) {
+                hidden.value = Array.from(selectedList.querySelectorAll('input[name="referral_types[]"]')).map(i => i.value).join(',');
+            }
+        });
+    }
+});
+
+document.getElementById('patientForm').addEventListener('click', function(e) {
+    const form = getVisibleForm(e.target);
+    if (!form) return;
+
+    // Lab test Add button
+    if (e.target.id === 'add_lab_test_btn' || e.target.closest('#add_lab_test_btn')) {
+        const input = form.querySelector('#lab_test_input');
+        const val = input ? input.value.trim() : '';
+        const selectedList = form.querySelector('#selected_lab_tests');
+        if (!val || !selectedList) return;
+        const already = Array.from(selectedList.querySelectorAll('input[name="lab_tests[]"]')).map(i => i.value);
+        if (!already.includes(val)) {
+            addBadge(selectedList, val, 'lab_tests[]');
+        }
+        if (input) input.value = '';
+    }
+
+    // Referral type Add button
+    if (e.target.id === 'add_referral_type_btn' || e.target.closest('#add_referral_type_btn')) {
+        const input = form.querySelector('#referral_type_input');
+        const val = input ? input.value.trim() : '';
+        const selectedList = form.querySelector('#selected_referral_types');
+        const hidden = form.querySelector('#referral_types_hidden');
+        if (!val || !selectedList) return;
+        const already = Array.from(selectedList.querySelectorAll('input[name="referral_types[]"]')).map(i => i.value);
+        if (!already.includes(val)) {
+            addBadge(selectedList, val, 'referral_types[]');
+            if (hidden) {
+                hidden.value = Array.from(selectedList.querySelectorAll('input[name="referral_types[]"]')).map(i => i.value).join(',');
+            }
+        }
+        if (input) input.value = '';
+    }
+});
+
+document.getElementById('patientForm').addEventListener('keydown', function(e) {
+    if (e.key !== 'Enter') return;
+    const form = getVisibleForm(e.target);
+    if (!form) return;
+
+    if (e.target.id === 'lab_test_input' || e.target.id === 'referral_type_input') {
+        e.preventDefault();
+        e.target.closest('.input-group')?.querySelector('#add_lab_test_btn, #add_referral_type_btn')?.click();
+    }
+});
+
+// Close autocomplete suggestions when clicking outside
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.input-group')) {
+        document.querySelectorAll('.autocomplete-suggestions').forEach(s => s.innerHTML = '');
+    }
 });
 </script>
 @endpush

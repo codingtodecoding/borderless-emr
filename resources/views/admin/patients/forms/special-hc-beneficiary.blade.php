@@ -1,4 +1,4 @@
-<!-- Special HC. Beneficiary Campaign - Patient Info, Location, Complaints, Investigation, Diagnosis, Treatment, Referral -->
+<!-- Special HC. Beneficiary Campaign - Full Form with Topic -->
 @php
     $patient = $patient ?? null;
 @endphp
@@ -10,81 +10,65 @@
 
 <div class="mb-2">
     <label for="topic_covered" class="form-label">Topic <span style="color: red;">*</span></label>
-    <input type="text" class="form-control @error('topic_covered') is-invalid @enderror" id="topic_covered" name="topic_covered" value="{{ old('topic_covered', $patient ? $patient->topic_covered : '') }}" placeholder="e.g., Health Awareness, Disease Prevention..." required>
+    <input type="text" class="form-control @error('topic_covered') is-invalid @enderror" id="topic_covered" name="topic_covered" value="{{ old('topic_covered', $patient ? $patient->topic_covered : '') }}" placeholder="e.g., Health Awareness, Disease Prevention...">
     @error('topic_covered')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<!-- Location Details Section -->
+<!-- Vital Signs Section -->
 <h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-geo-alt"></i> Location Details
+    <i class="bi bi-heart-pulse"></i> Vital Signs
 </h5>
 
 <div class="row">
-    <div class="col-md-3 mb-2">
-        <label for="country_id" class="form-label">Country <span style="color: red;">*</span></label>
-        <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id" onchange="loadStates()" required>
-            <option value="">-- Select Country --</option>
-            @foreach ($countries as $country)
-                <option value="{{ $country->id }}" {{ old('country_id', ($patient ? $patient->country_id : '')) == $country->id ? 'selected' : '' }}>
-                    {{ $country->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('country_id')
+    <div class="col-md-2 mb-2">
+        <label for="height" class="form-label">Height (cm)</label>
+        <input type="number" step="0.01" class="form-control @error('height') is-invalid @enderror" id="height" name="height" value="{{ old('height', $patient ? $patient->height : '') }}" placeholder="in cm">
+        @error('height')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
-    <div class="col-md-3 mb-2">
-        <label for="state_id" class="form-label">State <span style="color: red;">*</span></label>
-        <select class="form-select @error('state_id') is-invalid @enderror" id="state_id" name="state_id" onchange="loadDistricts()" required>
-            <option value="">-- Select State --</option>
-        </select>
-        @error('state_id')
+    <div class="col-md-2 mb-2">
+        <label for="weight" class="form-label">Weight (kg)</label>
+        <input type="number" step="0.01" class="form-control @error('weight') is-invalid @enderror" id="weight" name="weight" value="{{ old('weight', $patient ? $patient->weight : '') }}" placeholder="in kg">
+        @error('weight')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
-    <div class="col-md-3 mb-2">
-        <label for="district_id" class="form-label">District <span style="color: red;">*</span></label>
-        <select class="form-select @error('district_id') is-invalid @enderror" id="district_id" name="district_id" onchange="loadTalukas()" required>
-            <option value="">-- Select District --</option>
-        </select>
-        @error('district_id')
+    <div class="col-md-2 mb-2">
+        <label for="bmi_display" class="form-label">BMI</label>
+        <input type="text" class="form-control" id="bmi_display" readonly value="{{ old('bmi', $patient ? $patient->bmi : '') }}">
+        <input type="hidden" id="bmi" name="bmi" value="{{ old('bmi', $patient ? $patient->bmi : '') }}">
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="bp" class="form-label">BP (mmHg)</label>
+        <input type="text" class="form-control @error('bp') is-invalid @enderror" id="bp" name="bp" value="{{ old('bp', $patient ? $patient->bp : '') }}" placeholder="e.g., 120/80">
+        @error('bp')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
-    <div class="col-md-3 mb-2">
-        <label for="taluka_id" class="form-label">Taluka <span style="color: red;">*</span></label>
-        <select class="form-select @error('taluka_id') is-invalid @enderror" id="taluka_id" name="taluka_id" onchange="loadVillages()" required>
-            <option value="">-- Select Taluka --</option>
-        </select>
-        @error('taluka_id')
+    <div class="col-md-2 mb-2">
+        <label for="rbs" class="form-label">RBS (mg/dL)</label>
+        <input type="number" class="form-control @error('rbs') is-invalid @enderror" id="rbs" name="rbs" value="{{ old('rbs', $patient ? $patient->rbs : '') }}">
+        @error('rbs')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
+    <div class="col-md-2 mb-2">
+        <label for="bsl" class="form-label">BSL (mg/dL)</label>
+        <input type="number" class="form-control @error('bsl') is-invalid @enderror" id="bsl" name="bsl" value="{{ old('bsl', $patient ? $patient->bsl : '') }}">
+        @error('bsl')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-4 mb-2">
-        <label for="village" class="form-label">Village <span style="color: red;">*</span></label>
-        <input type="text" class="form-control @error('village') is-invalid @enderror" id="village" name="village" value="{{ old('village', ($patient ? $patient->village : '')) }}" placeholder="Search village..." autocomplete="off" required>
-        <div id="village-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2px;"></div>
-        @error('village')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-4 mb-2">
-        <label for="mobile" class="form-label">Mobile <span style="color: red;">*</span></label>
-        <input type="tel" class="form-control @error('mobile') is-invalid @enderror" id="mobile" name="mobile" value="{{ old('mobile', ($patient ? $patient->mobile : '')) }}" placeholder="10 digit mobile number" maxlength="10" required>
-        @error('mobile')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-4 mb-2">
-        <label for="aadhar" class="form-label">Aadhar</label>
-        <input type="text" class="form-control @error('aadhar') is-invalid @enderror" id="aadhar" name="aadhar" value="{{ old('aadhar', ($patient ? $patient->aadhar : '')) }}" placeholder="12 digit aadhar number" maxlength="12">
-        @error('aadhar')
+    <div class="col-md-2 mb-2">
+        <label for="hb" class="form-label">HB (g/dL)</label>
+        <input type="number" step="0.1" class="form-control @error('hb') is-invalid @enderror" id="hb" name="hb" value="{{ old('hb', $patient ? $patient->hb : '') }}">
+        @error('hb')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
@@ -96,60 +80,42 @@
 </h5>
 
 <div class="mb-2">
-    <label for="complaints_select" class="form-label">Chief Complaints</label>
-    <select class="form-select @error('complaints') is-invalid @enderror" id="complaints_select" name="complaints_select">
-        <option value="">-- Select Complaints --</option>
+    <label for="complaints_select" class="form-label">Chief Complaints (Multiple)</label>
+    <select class="form-select @error('complaints') is-invalid @enderror" id="complaints_select" name="complaints_select" multiple>
         @foreach ($complaints as $complaint)
             <option value="{{ $complaint->complaint }}">{{ $complaint->complaint }}</option>
         @endforeach
     </select>
-    <input type="hidden" id="complaints_hidden" name="complaints" value="{{ old('complaints', ($patient ? $patient->complaints : '')) }}">
+    <input type="hidden" id="complaints_hidden" name="complaints" value="{{ old('complaints', $patient ? $patient->complaints : '') }}">
     @error('complaints')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
 <div class="mb-2">
-    <label for="diagnosis_select" class="form-label">Diagnosis</label>
-    <select class="form-select @error('diagnosis') is-invalid @enderror" id="diagnosis_select" name="diagnosis_select">
-        <option value="">-- Select Diagnosis --</option>
-        @foreach ($diagnoses as $diagnosis)
-            <option value="{{ $diagnosis->title }}">{{ $diagnosis->title }}</option>
+    <label for="known_conditions_select" class="form-label">Known Conditions (Multiple)</label>
+    <select class="form-select @error('known_conditions') is-invalid @enderror" id="known_conditions_select" name="known_conditions_select" multiple>
+        @foreach ($knownConditions as $condition)
+            <option value="{{ $condition->title }}">{{ $condition->title }}</option>
         @endforeach
     </select>
-    <input type="hidden" id="diagnosis_hidden" name="diagnosis" value="{{ old('diagnosis', ($patient ? $patient->diagnosis : '')) }}">
-    @error('diagnosis')
+    <input type="hidden" id="known_conditions_hidden" name="known_conditions" value="{{ old('known_conditions', $patient ? $patient->known_conditions : '') }}">
+    @error('known_conditions')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<!-- Investigation Section -->
-<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-heart-pulse"></i> Investigation
-</h5>
-
-<div class="row">
-    <div class="col-md-3 mb-2">
-        <label for="height" class="form-label">Height (cm)</label>
-        <input type="number" step="0.01" class="form-control @error('height') is-invalid @enderror" id="height" name="height" value="{{ old('height', ($patient ? $patient->height : '')) }}" placeholder="in cm">
-        @error('height')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="weight" class="form-label">Weight (kg)</label>
-        <input type="number" step="0.01" class="form-control @error('weight') is-invalid @enderror" id="weight" name="weight" value="{{ old('weight', ($patient ? $patient->weight : '')) }}" placeholder="in kg">
-        @error('weight')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="bp" class="form-label">BP (mmHg)</label>
-        <input type="text" class="form-control @error('bp') is-invalid @enderror" id="bp" name="bp" value="{{ old('bp', ($patient ? $patient->bp : '')) }}" placeholder="e.g., 120/80">
-        @error('bp')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
+<div class="mb-2">
+    <label for="diagnosis_select" class="form-label">Diagnosis (Multiple)</label>
+    <select class="form-select @error('diagnosis') is-invalid @enderror" id="diagnosis_select" name="diagnosis_select" multiple>
+        @foreach ($diagnoses as $diagnosis)
+            <option value="{{ $diagnosis->title }}">{{ $diagnosis->title }}</option>
+        @endforeach
+    </select>
+    <input type="hidden" id="diagnosis_hidden" name="diagnosis" value="{{ old('diagnosis', $patient ? $patient->diagnosis : '') }}">
+    @error('diagnosis')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
 </div>
 
 <!-- Treatment Section -->
@@ -164,7 +130,7 @@
             <option value="{{ $treatment->name }}">{{ $treatment->name }}</option>
         @endforeach
     </select>
-    <input type="hidden" id="treatment_hidden" name="treatment" value="{{ old('treatment', ($patient ? $patient->treatment : '')) }}">
+    <input type="hidden" id="treatment_hidden" name="treatment" value="{{ old('treatment', $patient ? $patient->treatment : '') }}">
     @error('treatment')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
@@ -172,16 +138,54 @@
 
 <div class="mb-2">
     <label for="dosage" class="form-label">Dosage</label>
-    <textarea class="form-control @error('dosage') is-invalid @enderror" id="dosage" name="dosage" rows="2">{{ old('dosage', ($patient ? $patient->dosage : '')) }}</textarea>
+    <textarea class="form-control @error('dosage') is-invalid @enderror" id="dosage" name="dosage" rows="2">{{ old('dosage', $patient ? $patient->dosage : '') }}</textarea>
     @error('dosage')
         <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<!-- Referral -->
+<!-- Lab Tests & Referral -->
 <h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-arrow-up-right-square"></i> Referral
+    <i class="bi bi-flask"></i> Lab Tests & Referral
 </h5>
+
+<div class="mb-3">
+    <label class="form-label">Lab Tests</label>
+    <div class="lab-tests-container">
+        <div class="input-group mb-2">
+            <input type="text" class="form-control" id="lab_test_input" placeholder="Search and add lab tests..." autocomplete="off">
+            <button class="btn btn-outline-secondary" type="button" id="add_lab_test_btn">
+                <i class="bi bi-plus-lg"></i> Add
+            </button>
+        </div>
+        <div id="selected_lab_tests" class="selected-tests-list">
+            @php
+                $labTests = old('lab_tests', $patient->lab_tests ?? []);
+            @endphp
+            @if($labTests && is_array($labTests))
+                @foreach($labTests as $test)
+                    <span class="badge bg-primary me-2 mb-2">
+                        {{ $test }}
+                        <input type="hidden" name="lab_tests[]" value="{{ $test }}">
+                        <button type="button" class="btn-close btn-close-white ms-1" onclick="this.parentElement.remove()"></button>
+                    </span>
+                @endforeach
+            @endif
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6 mb-2">
+        <label for="sample_collected" class="form-label">Sample Collected</label>
+        <select class="form-select @error('sample_collected') is-invalid @enderror" id="sample_collected" name="sample_collected">
+            <option value="">-- Select --</option>
+            <option value="Yes" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'Yes' ? 'selected' : '' }}>Yes</option>
+            <option value="No" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'No' ? 'selected' : '' }}>No</option>
+            <option value="NA" {{ old('sample_collected', $patient ? $patient->sample_collected : '') == 'NA' ? 'selected' : '' }}>N/A</option>
+        </select>
+    </div>
+</div>
 
 <div class="mb-3">
     <label class="form-label">Referral Type (Add Multiple)</label>
@@ -214,5 +218,15 @@
 
 <div class="mb-2">
     <label for="referral_details" class="form-label">Referral Details</label>
-    <textarea class="form-control @error('referral_details') is-invalid @enderror" id="referral_details" name="referral_details" rows="2">{{ old('referral_details', ($patient ? $patient->referral_details : '')) }}</textarea>
+    <textarea class="form-control @error('referral_details') is-invalid @enderror" id="referral_details" name="referral_details" rows="2">{{ old('referral_details', $patient ? $patient->referral_details : '') }}</textarea>
+</div>
+
+<!-- Additional Notes -->
+<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
+    <i class="bi bi-sticky"></i> Additional Notes
+</h5>
+
+<div class="mb-2">
+    <label for="notes" class="form-label">Notes</label>
+    <textarea class="form-control @error('notes') is-invalid @enderror" id="notes" name="notes" rows="2">{{ old('notes', $patient ? $patient->notes : '') }}</textarea>
 </div>

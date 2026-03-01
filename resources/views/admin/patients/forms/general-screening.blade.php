@@ -3,80 +3,6 @@
     $patient = $patient ?? null;
 @endphp
 
-<!-- Location Details Section -->
-<h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
-    <i class="bi bi-geo-alt"></i> Location Details
-</h5>
-
-<div class="row">
-    <div class="col-md-3 mb-2">
-        <label for="country_id" class="form-label">Country <span style="color: red;">*</span></label>
-        <select class="form-select @error('country_id') is-invalid @enderror" id="country_id" name="country_id" onchange="loadStates()" required>
-            <option value="">-- Select Country --</option>
-            @foreach ($countries as $country)
-                <option value="{{ $country->id }}" {{ old('country_id', $patient ? $patient->country_id : '') == $country->id ? 'selected' : '' }}>
-                    {{ $country->name }}
-                </option>
-            @endforeach
-        </select>
-        @error('country_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="state_id" class="form-label">State <span style="color: red;">*</span></label>
-        <select class="form-select @error('state_id') is-invalid @enderror" id="state_id" name="state_id" onchange="loadDistricts()" required>
-            <option value="">-- Select State --</option>
-        </select>
-        @error('state_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="district_id" class="form-label">District <span style="color: red;">*</span></label>
-        <select class="form-select @error('district_id') is-invalid @enderror" id="district_id" name="district_id" onchange="loadTalukas()" required>
-            <option value="">-- Select District --</option>
-        </select>
-        @error('district_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-3 mb-2">
-        <label for="taluka_id" class="form-label">Taluka <span style="color: red;">*</span></label>
-        <select class="form-select @error('taluka_id') is-invalid @enderror" id="taluka_id" name="taluka_id" onchange="loadVillages()" required>
-            <option value="">-- Select Taluka --</option>
-        </select>
-        @error('taluka_id')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-</div>
-
-<div class="row">
-    <div class="col-md-4 mb-2">
-        <label for="village" class="form-label">Village <span style="color: red;">*</span></label>
-        <input type="text" class="form-control @error('village') is-invalid @enderror" id="village" name="village" value="{{ old('village', $patient ? $patient->village : '') }}" placeholder="Search village..." autocomplete="off" required>
-        <div id="village-suggestions" style="display: none; position: absolute; background: white; border: 1px solid #ccc; width: 100%; max-height: 200px; overflow-y: auto; z-index: 1000; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2px;"></div>
-        @error('village')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-4 mb-2">
-        <label for="mobile" class="form-label">Mobile <span style="color: red;">*</span></label>
-        <input type="tel" class="form-control @error('mobile') is-invalid @enderror" id="mobile" name="mobile" value="{{ old('mobile', $patient ? $patient->mobile : '') }}" placeholder="10 digit mobile number" maxlength="10" required>
-        @error('mobile')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-    <div class="col-md-4 mb-2">
-        <label for="aadhar" class="form-label">Aadhar</label>
-        <input type="text" class="form-control @error('aadhar') is-invalid @enderror" id="aadhar" name="aadhar" value="{{ old('aadhar', $patient ? $patient->aadhar : '') }}" placeholder="12 digit aadhar number" maxlength="12">
-        @error('aadhar')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-</div>
-
 <!-- Vital Signs Section -->
 <h5 class="mb-2 mt-3" style="color: #2e59a7; border-bottom: 2px solid #e3e6f0; padding-bottom: 8px; font-size: 0.95rem;">
     <i class="bi bi-heart-pulse"></i> Vital Signs
@@ -141,9 +67,8 @@
 </h5>
 
 <div class="mb-2">
-    <label for="complaints_select" class="form-label">Chief Complaints</label>
-    <select class="form-select @error('complaints') is-invalid @enderror" id="complaints_select" name="complaints_select">
-        <option value="">-- Select Complaints --</option>
+    <label for="complaints_select" class="form-label">Chief Complaints (Multiple)</label>
+    <select class="form-select @error('complaints') is-invalid @enderror" id="complaints_select" name="complaints_select" multiple>
         @foreach ($complaints as $complaint)
             <option value="{{ $complaint->complaint }}">{{ $complaint->complaint }}</option>
         @endforeach
@@ -155,9 +80,8 @@
 </div>
 
 <div class="mb-2">
-    <label for="known_conditions_select" class="form-label">Known Conditions</label>
-    <select class="form-select @error('known_conditions') is-invalid @enderror" id="known_conditions_select" name="known_conditions_select">
-        <option value="">-- Select Known Conditions --</option>
+    <label for="known_conditions_select" class="form-label">Known Conditions (Multiple)</label>
+    <select class="form-select @error('known_conditions') is-invalid @enderror" id="known_conditions_select" name="known_conditions_select" multiple>
         @foreach ($knownConditions as $condition)
             <option value="{{ $condition->title }}">{{ $condition->title }}</option>
         @endforeach
@@ -169,9 +93,8 @@
 </div>
 
 <div class="mb-2">
-    <label for="diagnosis_select" class="form-label">Diagnosis</label>
-    <select class="form-select @error('diagnosis') is-invalid @enderror" id="diagnosis_select" name="diagnosis_select">
-        <option value="">-- Select Diagnosis --</option>
+    <label for="diagnosis_select" class="form-label">Diagnosis (Multiple)</label>
+    <select class="form-select @error('diagnosis') is-invalid @enderror" id="diagnosis_select" name="diagnosis_select" multiple>
         @foreach ($diagnoses as $diagnosis)
             <option value="{{ $diagnosis->title }}">{{ $diagnosis->title }}</option>
         @endforeach
