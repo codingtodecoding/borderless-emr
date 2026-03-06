@@ -1,8 +1,6 @@
-@extends('layouts.admin')
+<?php $__env->startSection('page-title', 'Import Patient Data'); ?>
 
-@section('page-title', 'Import Patient Data')
-
-@section('admin-content')
+<?php $__env->startSection('admin-content'); ?>
 <div class="container-fluid py-4">
     <div class="row mb-4">
         <div class="col-md-8">
@@ -10,35 +8,35 @@
             <p class="text-muted">Bulk upload patient records using an Excel file</p>
         </div>
         <div class="col-md-4 text-end">
-            <a href="{{ route('admin.patients.download-template', 7) }}" id="templateDownloadBtn" class="btn btn-success">
+            <a href="<?php echo e(route('admin.patients.download-template', 7)); ?>" id="templateDownloadBtn" class="btn btn-success">
                 <i class="bi bi-download"></i> Download Sample Template
             </a>
         </div>
     </div>
 
-    @if ($errors->any())
+    <?php if($errors->any()): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <h5 class="alert-heading">Please fix the following errors:</h5>
             <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?>
 
-    @if ($message = session('success'))
+    <?php if($message = session('success')): ?>
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <h5 class="alert-heading">Import Successful!</h5>
-            <p class="mb-2">{{ $message }}</p>
-            <a href="{{ route('admin.patients.index') }}" class="btn btn-sm btn-primary">View All Patients</a>
+            <p class="mb-2"><?php echo e($message); ?></p>
+            <a href="<?php echo e(route('admin.patients.index')); ?>" class="btn btn-sm btn-primary">View All Patients</a>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
 
-        @if (session('failureCount') > 0)
+        <?php if(session('failureCount') > 0): ?>
             <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
-                <h5 class="alert-heading">Failed Records ({{ session('failureCount') }})</h5>
+                <h5 class="alert-heading">Failed Records (<?php echo e(session('failureCount')); ?>)</h5>
                 <div class="table-responsive">
                     <table class="table table-sm table-striped mb-0">
                         <thead class="table-light">
@@ -50,37 +48,39 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (session('duplicates', []) as $duplicate)
+                            <?php $__currentLoopData = session('duplicates', []); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $duplicate): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
-                                    <td>{{ $duplicate['patient_name'] }}</td>
-                                    <td>{{ $duplicate['date'] }}</td>
-                                    <td>{{ $duplicate['aadhar'] }}</td>
+                                    <td><?php echo e($duplicate['patient_name']); ?></td>
+                                    <td><?php echo e($duplicate['date']); ?></td>
+                                    <td><?php echo e($duplicate['aadhar']); ?></td>
                                     <td>
-                                        <small class="text-danger">{{ $duplicate['reason'] }}</small>
+                                        <small class="text-danger"><?php echo e($duplicate['reason']); ?></small>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
-        @endif
-    @endif
+        <?php endif; ?>
+    <?php endif; ?>
 
-    @if ($message = session('warning'))
+    <?php if($message = session('warning')): ?>
         <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i> {{ $message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+            <i class="bi bi-exclamation-triangle"></i> <?php echo e($message); ?>
 
-    @if ($message = session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-circle"></i> {{ $message }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
-    @endif
+    <?php endif; ?>
+
+    <?php if($message = session('error')): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <?php echo e($message); ?>
+
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
 
     <div class="row">
         <div class="col-lg-8">
@@ -88,45 +88,60 @@
                 <div class="card-body p-4">
                     <h5 class="card-title mb-4">Upload Excel File</h5>
 
-                    <form action="{{ route('admin.patients.import') }}" method="POST" enctype="multipart/form-data" novalidate>
-                        @csrf
+                    <form action="<?php echo e(route('admin.patients.import')); ?>" method="POST" enctype="multipart/form-data" novalidate>
+                        <?php echo csrf_field(); ?>
 
                         <div class="mb-4">
                             <label for="campaign_type_id" class="form-label fw-bold">Select Campaign Type <span class="text-danger">*</span></label>
-                            <select class="form-select @error('campaign_type_id') is-invalid @enderror"
+                            <select class="form-select <?php $__errorArgs = ['campaign_type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                     id="campaign_type_id"
                                     name="campaign_type_id"
                                     required>
                                 <option value="">-- Select Campaign Type --</option>
-                                @forelse($campaignTypes as $campaign)
-                                    <option value="{{ $campaign->id }}" {{ old('campaign_type_id') == $campaign->id ? 'selected' : '' }}>
-                                        {{ $campaign->name }}
+                                <?php $__empty_1 = true; $__currentLoopData = $campaignTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $campaign): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                    <option value="<?php echo e($campaign->id); ?>" <?php echo e(old('campaign_type_id') == $campaign->id ? 'selected' : ''); ?>>
+                                        <?php echo e($campaign->name); ?>
+
                                     </option>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                     <option disabled>No campaign types available</option>
-                                @endforelse
+                                <?php endif; ?>
                             </select>
                             <small class="form-text text-muted d-block mt-2">
                                 Choose the campaign type for which you want to import patients. The template will show fields specific to this campaign type.
                             </small>
-                            @error('campaign_type_id')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['campaign_type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                             <!-- Sample Files Quick Links -->
                             <div id="sampleFilesContainer" class="mt-3 p-3 bg-light rounded" style="display: none;">
                                 <small class="d-block fw-bold mb-2">📥 Download Sample Files:</small>
                                 <div class="d-flex gap-2 flex-wrap">
-                                    <a href="{{ route('admin.patients.download-sample-csv', 7) }}" id="sampleLink7" class="btn btn-sm btn-outline-info" style="display: none;">
+                                    <a href="<?php echo e(route('admin.patients.download-sample-csv', 7)); ?>" id="sampleLink7" class="btn btn-sm btn-outline-info" style="display: none;">
                                         <i class="bi bi-download"></i> CSV (General Screening)
                                     </a>
-                                    <a href="{{ route('admin.patients.download-sample-csv', 8) }}" id="sampleLink8" class="btn btn-sm btn-outline-info" style="display: none;">
+                                    <a href="<?php echo e(route('admin.patients.download-sample-csv', 8)); ?>" id="sampleLink8" class="btn btn-sm btn-outline-info" style="display: none;">
                                         <i class="bi bi-download"></i> CSV (Swatch Bharat)
                                     </a>
-                                    <a href="{{ route('admin.patients.download-sample-csv', 9) }}" id="sampleLink9" class="btn btn-sm btn-outline-info" style="display: none;">
+                                    <a href="<?php echo e(route('admin.patients.download-sample-csv', 9)); ?>" id="sampleLink9" class="btn btn-sm btn-outline-info" style="display: none;">
                                         <i class="bi bi-download"></i> CSV (Special HC)
                                     </a>
-                                    <a href="{{ route('admin.patients.download-sample-csv', 10) }}" id="sampleLink10" class="btn btn-sm btn-outline-info" style="display: none;">
+                                    <a href="<?php echo e(route('admin.patients.download-sample-csv', 10)); ?>" id="sampleLink10" class="btn btn-sm btn-outline-info" style="display: none;">
                                         <i class="bi bi-download"></i> CSV (Awareness Camp)
                                     </a>
                                 </div>
@@ -137,7 +152,14 @@
                             <label for="file" class="form-label fw-bold">Select Excel File <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <input type="file"
-                                       class="form-control @error('file') is-invalid @enderror"
+                                       class="form-control <?php $__errorArgs = ['file'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                        id="file"
                                        name="file"
                                        accept=".xlsx,.xls,.csv"
@@ -150,9 +172,16 @@
                                 Supported formats: Excel (.xlsx, .xls) or CSV
                                 <br>Maximum file size: 10 MB
                             </small>
-                            @error('file')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
+                            <?php $__errorArgs = ['file'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
                     </form>
                 </div>
@@ -323,10 +352,10 @@
                         <i class="bi bi-info-circle"></i> Help
                     </h6>
                     <p class="small mb-3">Need help with the import process?</p>
-                    <a href="{{ route('admin.patients.index') }}" class="btn btn-sm btn-outline-primary w-100">
+                    <a href="<?php echo e(route('admin.patients.index')); ?>" class="btn btn-sm btn-outline-primary w-100">
                         <i class="bi bi-list"></i> View Patient List
                     </a>
-                    <a href="{{ route('admin.patients.create') }}" class="btn btn-sm btn-outline-secondary w-100 mt-2">
+                    <a href="<?php echo e(route('admin.patients.create')); ?>" class="btn btn-sm btn-outline-secondary w-100 mt-2">
                         <i class="bi bi-plus-circle"></i> Add Single Patient
                     </a>
                 </div>
@@ -363,7 +392,7 @@
         if (campaignTypeId) {
             // Update template download link
             const downloadBtn = document.getElementById('templateDownloadBtn');
-            downloadBtn.href = "{{ route('admin.patients.download-template', '') }}" + campaignTypeId;
+            downloadBtn.href = "<?php echo e(route('admin.patients.download-template', '')); ?>" + campaignTypeId;
 
             // Show sample files container and hide all links
             const sampleContainer = document.getElementById('sampleFilesContainer');
@@ -391,7 +420,7 @@
         const campaignTypeId = document.getElementById('campaign_type_id').value;
         if (campaignTypeId) {
             const downloadBtn = document.getElementById('templateDownloadBtn');
-            downloadBtn.href = "{{ route('admin.patients.download-template', '') }}" + campaignTypeId;
+            downloadBtn.href = "<?php echo e(route('admin.patients.download-template', '')); ?>" + campaignTypeId;
 
             // Show sample files container
             const sampleContainer = document.getElementById('sampleFilesContainer');
@@ -411,4 +440,6 @@
         }
     });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH /Users/avinashvidyanand/Documents/projects/borderless-new/resources/views/admin/patients/import.blade.php ENDPATH**/ ?>

@@ -292,25 +292,43 @@ class PatientController extends Controller
 
     public function importForm()
     {
-        return view('admin.patients.import');
+        $campaignTypes = CampaignType::active()->get();
+        return view('admin.patients.import', compact('campaignTypes'));
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate($campaignTypeId = 7)
     {
-        return Excel::download(new PatientTemplateExport(), 'patient_template.xlsx');
+        $campaignTypeId = (int) $campaignTypeId;
+
+        // Validate campaign type exists
+        $campaignType = CampaignType::find($campaignTypeId);
+        if (!$campaignType) {
+            $campaignTypeId = 7; // Default to General Screening
+        }
+
+        $filename = match($campaignTypeId) {
+            7 => 'patient_template_general_screening.xlsx',
+            8 => 'patient_template_swatch_bharat.xlsx',
+            9 => 'patient_template_special_hc.xlsx',
+            10 => 'patient_template_awareness_camp.xlsx',
+            default => 'patient_template_general_screening.xlsx',
+        };
+
+        return Excel::download(new PatientTemplateExport($campaignTypeId), $filename);
     }
 
     public function import(Request $request)
     {
-
-       
         $request->validate([
+            'campaign_type_id' => 'required|integer|exists:campaign_types,id',
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
         ]);
 
         try {
-            $import = new PatientImport();
-           
+            $campaignTypeId = (int) $request->input('campaign_type_id');
+
+            // Create import instance with campaign type
+            $import = new PatientImport($campaignTypeId);
 
             Excel::import($import, $request->file('file'));
 
@@ -333,6 +351,97 @@ class PatientController extends Controller
             return redirect()->route('admin.patients.index')
                             ->with('error', 'Error importing file: ' . $e->getMessage());
         }
+    }
+
+    public function downloadSampleCsv($campaignTypeId = 7)
+    {
+        $campaignTypeId = (int) $campaignTypeId;
+
+        // Validate campaign type exists
+        $campaignType = CampaignType::find($campaignTypeId);
+        if (!$campaignType) {
+            $campaignTypeId = 7; // Default to General Screening
+        }
+
+        $filename = match($campaignTypeId) {
+            7 => 'sample_general_screening.csv',
+            8 => 'sample_swatch_bharat.csv',
+            9 => 'sample_special_hc.csv',
+            10 => 'sample_awareness_camp.csv',
+            default => 'sample_general_screening.csv',
+        };
+
+        $data = $this->getSampleCsvData($campaignTypeId);
+        $csv = $this->arrayToCsv($data);
+
+        return response($csv, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    protected function getSampleCsvData($campaignTypeId): array
+    {
+        return match($campaignTypeId) {
+            7 => $this->getGeneralScreeningSample(),
+            8 => $this->getSwatchBharatSample(),
+            9 => $this->getSpecialHCSample(),
+            10 => $this->getAwarenessCampSample(),
+            default => $this->getGeneralScreeningSample(),
+        };
+    }
+
+    protected function getGeneralScreeningSample(): array
+    {
+        return [
+            ['Patient Name', 'Age', 'Sex (Male/Female/Other)', 'Date (DD/MM/YYYY)', 'Village', 'Country (Reference)', 'State (Reference)', 'District (Reference)', 'Taluka ID', 'Mobile (10 digits)', 'Aadhar (12 digits)', 'Height (cm)', 'Weight (kg)', 'BP', 'RBS (Blood Sugar)', 'BSL (Fasting)', 'HB (Hemoglobin)', 'Complaints', 'Known Conditions', 'Diagnosis', 'Treatment', 'Dosage', 'Lab Tests (comma-separated)', 'Sample Collected (Yes/No/NA)', 'Referral Type', 'Referral Details', 'Notes'],
+            ['John Doe', 28, 'Male', '15/12/2025', 'Village Name', 'India', 'Maharashtra', 'Pune', '1', '9876543210', '123456789012', '170.50', '70.50', '120/80', '150', '90', '13.50', 'Headache, Fever', 'Hypertension', 'Common Cold', 'Paracetamol', '500mg x 2', 'Blood Test, Urine Test', 'Yes', 'Doctor Referral', 'General practitioner advised', 'Patient recovery good'],
+            ['Jane Smith', 35, 'Female', '16/12/2025', 'Another Village', 'India', 'Maharashtra', 'Pune', '1', '8765432109', '987654321098', '165.50', '65.50', '118/78', '140', '85', '12.50', 'Cough', 'Diabetes', 'Asthma', 'Cetirizine', '10mg x 1', 'Chest X-ray, ECG', 'No', 'Hospital', 'Requires specialist care', 'Follow-up needed'],
+        ];
+    }
+
+    protected function getSwatchBharatSample(): array
+    {
+        return [
+            ['Patient Name', 'Age', 'Sex (Male/Female/Other)', 'Date (DD/MM/YYYY)', 'Village', 'Country (Reference)', 'State (Reference)', 'District (Reference)', 'Taluka ID', 'Mobile (10 digits)', 'Aadhar (12 digits)'],
+            ['Priya Sharma', 32, 'Female', '20/12/2025', 'Village A', 'India', 'Maharashtra', 'Pune', '1', '9234567890', '321654987321'],
+            ['Rajesh Kumar', 45, 'Male', '21/12/2025', 'Village B', 'India', 'Maharashtra', 'Pune', '1', '9123456789', '456789123456'],
+            ['Meena Patel', 28, 'Female', '22/12/2025', 'Village C', 'India', 'Maharashtra', 'Pune', '1', '9012345678', '789012345678'],
+        ];
+    }
+
+    protected function getSpecialHCSample(): array
+    {
+        return [
+            ['Patient Name', 'Age', 'Sex (Male/Female/Other)', 'Date (DD/MM/YYYY)', 'Village', 'Country (Reference)', 'State (Reference)', 'District (Reference)', 'Taluka ID', 'Mobile (10 digits)', 'Aadhar (12 digits)', 'Topic Covered', 'Height (cm)', 'Weight (kg)', 'BP', 'RBS (Blood Sugar)', 'BSL (Fasting)', 'HB (Hemoglobin)', 'Complaints', 'Known Conditions', 'Diagnosis', 'Treatment', 'Dosage', 'Lab Tests (comma-separated)', 'Sample Collected (Yes/No/NA)', 'Referral Type', 'Referral Details', 'Notes'],
+            ['Rajesh Kumar', 45, 'Male', '18/12/2025', 'Village Name', 'India', 'Maharashtra', 'Pune', '1', '9123456789', '456789123456', 'Health Awareness', '170.50', '70.50', '120/80', '150', '90', '13.50', 'Headache, Fever', 'Hypertension', 'Common Cold', 'Paracetamol', '500mg x 2', 'Blood Test, Urine Test', 'Yes', 'Doctor Referral', 'General practitioner advised', 'Patient recovery good'],
+            ['Sunita Desai', 38, 'Female', '19/12/2025', 'Another Village', 'India', 'Maharashtra', 'Pune', '1', '9345678901', '654321098765', 'Disease Prevention', '162.50', '62.50', '115/75', '120', '80', '12.00', 'Dizziness', 'Thyroid', 'Migraine', 'Aspirin', '500mg x 1', 'Blood Test', 'No', 'Home Care', 'Rest recommended', 'Monitor symptoms'],
+        ];
+    }
+
+    protected function getAwarenessCampSample(): array
+    {
+        return [
+            ['Patient Name', 'Age', 'Sex (Male/Female/Other)', 'Date (DD/MM/YYYY)', 'Village', 'Country (Reference)', 'State (Reference)', 'District (Reference)', 'Taluka ID', 'Mobile (10 digits)', 'Aadhar (12 digits)', 'Topic Covered', 'Height (cm)', 'Weight (kg)', 'BP', 'RBS (Blood Sugar)', 'BSL (Fasting)', 'HB (Hemoglobin)', 'Advice & Notes'],
+            ['Priya Sharma', 32, 'Female', '22/12/2025', 'Village Name', 'India', 'Maharashtra', 'Pune', '1', '9234567890', '321654987321', 'Disease Prevention', '168.50', '65.50', '118/78', '140', '85', '12.50', 'Awareness session attended, good health'],
+            ['Arun Singh', 42, 'Male', '23/12/2025', 'Another Village', 'India', 'Maharashtra', 'Pune', '1', '9456789012', '876543210987', 'Health Education', '175.00', '78.50', '125/82', '160', '95', '14.00', 'Session beneficial, maintain exercise routine'],
+            ['Kavya Nair', 29, 'Female', '24/12/2025', 'Third Village', 'India', 'Maharashtra', 'Pune', '1', '9567890123', '987654321098', 'Nutrition & Wellness', '160.00', '60.00', '110/70', '110', '75', '11.50', 'Interested in diet modifications'],
+        ];
+    }
+
+    protected function arrayToCsv(array $data): string
+    {
+        $csv = '';
+        foreach ($data as $row) {
+            $csv .= implode(',', array_map(function ($value) {
+                // Escape quotes and wrap in quotes if contains comma
+                if (is_string($value) && (strpos($value, ',') !== false || strpos($value, '"') !== false)) {
+                    return '"' . str_replace('"', '""', $value) . '"';
+                }
+                return $value;
+            }, $row)) . "\n";
+        }
+        return $csv;
     }
 
 }

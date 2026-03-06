@@ -16,6 +16,7 @@ class PatientImport implements ToCollection, WithHeadingRow
     protected $duplicates = [];
     protected $successCount = 0;
     protected $failureCount = 0;
+    protected $campaignTypeId = 7; // Default to General Screening
     protected $keywordMap = [
         'sex' => 'sex',
         'date' => 'date',
@@ -33,7 +34,7 @@ class PatientImport implements ToCollection, WithHeadingRow
         'age' => 'age',
         'village' => 'village',
         'taluka_id' => 'taluka_id',
-        'district_reference' => 'district_reference', 
+        'district_reference' => 'district_reference',
         'complaints' => 'complaints',
         'diagnosis' => 'diagnosis',
         'treatment' => 'treatment',
@@ -42,8 +43,24 @@ class PatientImport implements ToCollection, WithHeadingRow
         'height' => 'height',
         'bp' => 'bp',
         'referral_type' => 'referral_type',
+        'referral_details' => 'referral_details',
         'notes' => 'notes',
+        'topic' => 'topic_covered',
+        'topic_covered' => 'topic_covered',
+        'advice' => 'notes',
+        'known_conditions' => 'known_conditions',
     ];
+
+    public function __construct($campaignTypeId = 7)
+    {
+        $this->campaignTypeId = $campaignTypeId;
+    }
+
+    public function setCampaignType($campaignTypeId)
+    {
+        $this->campaignTypeId = $campaignTypeId;
+        return $this;
+    }
 
     public function collection(Collection $rows)
     {
@@ -128,6 +145,17 @@ class PatientImport implements ToCollection, WithHeadingRow
 
     public function rules(): array
     {
+        return match($this->campaignTypeId) {
+            7 => $this->generalScreeningRules(),
+            8 => $this->swatchBharatRules(),
+            9 => $this->specialHCRules(),
+            10 => $this->awarenessCampRules(),
+            default => $this->generalScreeningRules(),
+        };
+    }
+
+    private function generalScreeningRules(): array
+    {
         return [
             'patient_name' => 'required|string|max:255',
             'age' => 'required|integer|min:0|max:150',
@@ -152,6 +180,73 @@ class PatientImport implements ToCollection, WithHeadingRow
             'sample_collected' => 'nullable|in:Yes,No,NA',
             'referral_type' => 'nullable|string|max:255',
             'referral_details' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ];
+    }
+
+    private function swatchBharatRules(): array
+    {
+        return [
+            'patient_name' => 'required|string|max:255',
+            'age' => 'required|integer|min:0|max:150',
+            'sex' => 'required|in:Male,Female,Other',
+            'date' => 'required',
+            'village' => 'required|string|max:255',
+            'taluka_id' => 'required|integer|exists:talukas,id',
+            'mobile' => 'required|regex:/^[0-9]{10}$/',
+            'aadhar' => 'nullable|regex:/^[0-9]{12}$/',
+        ];
+    }
+
+    private function specialHCRules(): array
+    {
+        return [
+            'patient_name' => 'required|string|max:255',
+            'age' => 'required|integer|min:0|max:150',
+            'sex' => 'required|in:Male,Female,Other',
+            'date' => 'required',
+            'village' => 'required|string|max:255',
+            'taluka_id' => 'required|integer|exists:talukas,id',
+            'mobile' => 'required|regex:/^[0-9]{10}$/',
+            'aadhar' => 'nullable|regex:/^[0-9]{12}$/',
+            'topic_covered' => 'required|string|max:255',
+            'height' => 'nullable|numeric|min:0|max:999.99',
+            'weight' => 'nullable|numeric|min:0|max:999.99',
+            'bp' => 'nullable|string|max:20',
+            'rbs' => 'nullable|integer|min:0|max:600',
+            'bsl' => 'nullable|integer|min:0|max:600',
+            'hb' => 'nullable|numeric|min:0|max:20',
+            'complaints' => 'required|string',
+            'known_conditions' => 'nullable|string',
+            'diagnosis' => 'required|string',
+            'treatment' => 'required|string',
+            'dosage' => 'required|string',
+            'lab_tests' => 'nullable|string',
+            'sample_collected' => 'nullable|in:Yes,No,NA',
+            'referral_type' => 'nullable|string|max:255',
+            'referral_details' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ];
+    }
+
+    private function awarenessCampRules(): array
+    {
+        return [
+            'patient_name' => 'required|string|max:255',
+            'age' => 'required|integer|min:0|max:150',
+            'sex' => 'required|in:Male,Female,Other',
+            'date' => 'required',
+            'village' => 'required|string|max:255',
+            'taluka_id' => 'required|integer|exists:talukas,id',
+            'mobile' => 'required|regex:/^[0-9]{10}$/',
+            'aadhar' => 'nullable|regex:/^[0-9]{12}$/',
+            'topic_covered' => 'required|string|max:255',
+            'height' => 'nullable|numeric|min:0|max:999.99',
+            'weight' => 'nullable|numeric|min:0|max:999.99',
+            'bp' => 'nullable|string|max:20',
+            'rbs' => 'nullable|integer|min:0|max:600',
+            'bsl' => 'nullable|integer|min:0|max:600',
+            'hb' => 'nullable|numeric|min:0|max:20',
             'notes' => 'nullable|string',
         ];
     }
@@ -195,11 +290,13 @@ class PatientImport implements ToCollection, WithHeadingRow
             $labTests = array_filter(array_map('trim', explode(',', $row['lab_tests'])));
         }
 
+        // Base patient data (common to all campaign types)
         $patientData = [
             'patient_name' => $row['patient_name'],
             'age' => $row['age'],
             'sex' => $row['sex'],
             'date' => $date,
+            'campaign_type_id' => $this->campaignTypeId,
             'village' => $row['village'],
             'taluka_id' => $row['taluka_id'],
             'district_id' => $taluka->district_id,
@@ -207,6 +304,24 @@ class PatientImport implements ToCollection, WithHeadingRow
             'country_id' => $taluka->district->state->country_id,
             'mobile' => $row['mobile'],
             'aadhar' => $row['aadhar'] ?? null,
+            'created_by' => auth()->id(),
+        ];
+
+        // Add campaign-specific fields
+        match($this->campaignTypeId) {
+            7 => $this->addGeneralScreeningFields($patientData, $row, $labTests),
+            8 => $this->addSwatchBharatFields($patientData, $row),
+            9 => $this->addSpecialHCFields($patientData, $row, $labTests),
+            10 => $this->addAwarenessCampFields($patientData, $row),
+            default => $this->addGeneralScreeningFields($patientData, $row, $labTests),
+        };
+
+        Patient::create($patientData);
+    }
+
+    protected function addGeneralScreeningFields(&$patientData, $row, $labTests): void
+    {
+        $patientData = array_merge($patientData, [
             'height' => $row['height'] ?? null,
             'weight' => $row['weight'] ?? null,
             'bp' => $row['bp'] ?? null,
@@ -219,14 +334,54 @@ class PatientImport implements ToCollection, WithHeadingRow
             'treatment' => $row['treatment'],
             'dosage' => $row['dosage'],
             'lab_tests' => !empty($labTests) ? json_encode($labTests) : null,
-            'sample_collected' => isset($row['sample_collected']) ? $row['sample_collected'] : null,
+            'sample_collected' => $row['sample_collected'] ?? null,
             'referral_type' => $row['referral_type'] ?? null,
             'referral_details' => $row['referral_details'] ?? null,
             'notes' => $row['notes'] ?? null,
-            'created_by' => auth()->id(),
-        ];
+        ]);
+    }
 
-        Patient::create($patientData);
+    protected function addSwatchBharatFields(&$patientData, $row): void
+    {
+        // Swatch Bharat has minimal fields - only location-based
+        // No additional fields needed beyond the base data
+    }
+
+    protected function addSpecialHCFields(&$patientData, $row, $labTests): void
+    {
+        $patientData = array_merge($patientData, [
+            'topic_covered' => $row['topic_covered'] ?? null,
+            'height' => $row['height'] ?? null,
+            'weight' => $row['weight'] ?? null,
+            'bp' => $row['bp'] ?? null,
+            'rbs' => $row['rbs'] ?? null,
+            'bsl' => $row['bsl'] ?? null,
+            'hb' => $row['hb'] ?? null,
+            'complaints' => $row['complaints'],
+            'known_conditions' => $row['known_conditions'] ?? null,
+            'diagnosis' => $row['diagnosis'],
+            'treatment' => $row['treatment'],
+            'dosage' => $row['dosage'],
+            'lab_tests' => !empty($labTests) ? json_encode($labTests) : null,
+            'sample_collected' => $row['sample_collected'] ?? null,
+            'referral_type' => $row['referral_type'] ?? null,
+            'referral_details' => $row['referral_details'] ?? null,
+            'notes' => $row['notes'] ?? null,
+        ]);
+    }
+
+    protected function addAwarenessCampFields(&$patientData, $row): void
+    {
+        $patientData = array_merge($patientData, [
+            'topic_covered' => $row['topic_covered'] ?? null,
+            'height' => $row['height'] ?? null,
+            'weight' => $row['weight'] ?? null,
+            'bp' => $row['bp'] ?? null,
+            'rbs' => $row['rbs'] ?? null,
+            'bsl' => $row['bsl'] ?? null,
+            'hb' => $row['hb'] ?? null,
+            'notes' => $row['notes'] ?? null,
+        ]);
     }
 
     public function getSuccessCount()

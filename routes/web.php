@@ -148,7 +148,8 @@ Route::prefix('admin')->middleware(['auth'])->name('admin.')->group(function () 
     Route::middleware('permission:patients_view,patients_create')->group(function () {
         Route::get('/patients/import-form', [PatientController::class, 'importForm'])->name('patients.import-form');
         Route::post('/patients/import', [PatientController::class, 'import'])->name('patients.import');
-        Route::get('/patients/download-template', [PatientController::class, 'downloadTemplate'])->name('patients.download-template');
+        Route::get('/patients/download-template/{campaignTypeId?}', [PatientController::class, 'downloadTemplate'])->name('patients.download-template');
+        Route::get('/patients/download-sample-csv/{campaignTypeId?}', [PatientController::class, 'downloadSampleCsv'])->name('patients.download-sample-csv');
     });
 
     // Patient Resource Routes (CRUD)

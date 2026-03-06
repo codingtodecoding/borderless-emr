@@ -101,10 +101,38 @@
     <?php endif; ?>
 </div>
 
+<!-- Database Migrations Section -->
+<div class="form-container mb-4">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0;">
+            <i class="bi bi-database-fill-gear"></i> Database Migrations
+        </h3>
+    </div>
+    <hr>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" id="runMigrationsBtn" class="btn btn-primary">
+            <i class="bi bi-play-fill"></i> Run Migrations
+        </button>
+        <button type="button" id="rollbackBtn" class="btn btn-warning">
+            <i class="bi bi-arrow-counterclockwise"></i> Rollback Last Batch
+        </button>
+        <button type="button" id="statusBtn" class="btn btn-info">
+            <i class="bi bi-info-circle"></i> Check Status
+        </button>
+    </div>
+    <div id="migrationOutput" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 5px; border-left: 4px solid #4e73df;">
+        <pre id="migrationOutputText" style="margin: 0; white-space: pre-wrap; word-wrap: break-word; font-size: 0.85rem;"></pre>
+    </div>
+    <div id="migrationAlert" style="display: none; margin-top: 20px; padding: 15px; border-radius: 5px;">
+        <div id="migrationAlertMessage"></div>
+    </div>
+</div>
+
 <?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // User Growth Chart
         const ctx = document.getElementById('userGrowthChart').getContext('2d');
         const data = <?php echo json_encode($userGrowthData, 15, 512) ?>;
 
@@ -149,6 +177,125 @@
                     }
                 }
             }
+        });
+
+        // Migration buttons functionality
+        const runBtn = document.getElementById('runMigrationsBtn');
+        const rollbackBtn = document.getElementById('rollbackBtn');
+        const statusBtn = document.getElementById('statusBtn');
+        const outputDiv = document.getElementById('migrationOutput');
+        const outputText = document.getElementById('migrationOutputText');
+        const alertDiv = document.getElementById('migrationAlert');
+        const alertMessage = document.getElementById('migrationAlertMessage');
+
+        function showOutput(output) {
+            outputText.textContent = output;
+            outputDiv.style.display = 'block';
+            alertDiv.style.display = 'none';
+        }
+
+        function showAlert(message, isSuccess) {
+            alertDiv.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-danger');
+            alertMessage.textContent = message;
+            alertDiv.style.display = 'block';
+            outputDiv.style.display = 'none';
+        }
+
+        function disableButtons(disabled) {
+            runBtn.disabled = disabled;
+            rollbackBtn.disabled = disabled;
+            statusBtn.disabled = disabled;
+        }
+
+        // Run Migrations
+        runBtn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to run all pending migrations?')) {
+                disableButtons(true);
+                runBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Running...';
+
+                fetch('<?php echo e(route("admin.migrations.run")); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, true);
+                        showOutput(data.output);
+                    } else {
+                        showAlert(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    showAlert('Error: ' + error.message, false);
+                })
+                .finally(function () {
+                    disableButtons(false);
+                    runBtn.innerHTML = '<i class="bi bi-play-fill"></i> Run Migrations';
+                });
+            }
+        });
+
+        // Rollback Migrations
+        rollbackBtn.addEventListener('click', function () {
+            if (confirm('Are you sure you want to rollback the last batch of migrations?')) {
+                disableButtons(true);
+                rollbackBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Rolling back...';
+
+                fetch('<?php echo e(route("admin.migrations.rollback")); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, true);
+                        showOutput(data.output);
+                    } else {
+                        showAlert(data.message, false);
+                    }
+                })
+                .catch(error => {
+                    showAlert('Error: ' + error.message, false);
+                })
+                .finally(function () {
+                    disableButtons(false);
+                    rollbackBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i> Rollback Last Batch';
+                });
+            }
+        });
+
+        // Check Status
+        statusBtn.addEventListener('click', function () {
+            disableButtons(true);
+            statusBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Checking...';
+
+            fetch('<?php echo e(route("admin.migrations.status")); ?>', {
+                headers: {
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showOutput(data.output);
+                } else {
+                    showAlert(data.message, false);
+                }
+            })
+            .catch(error => {
+                showAlert('Error: ' + error.message, false);
+            })
+            .finally(function () {
+                disableButtons(false);
+                statusBtn.innerHTML = '<i class="bi bi-info-circle"></i> Check Status';
+            });
         });
     });
 </script>
